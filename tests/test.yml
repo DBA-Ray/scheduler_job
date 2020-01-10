@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: mgr
   remote_user: root
   roles:
-    - scheduler_job
+    - dba_ray.scheduler_job
