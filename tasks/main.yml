@@ -1,2 +1,5 @@
 ---
 # tasks file for scheduler_job
+- include: password.yml
+
+- include: mysql-summary.yml

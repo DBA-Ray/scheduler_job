@@ -1,2 +1,4 @@
 ---
-# vars file for scheduler_job
+# vars file for mysql-summary
+vars_files:
+  - secrets.yml
