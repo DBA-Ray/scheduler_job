@@ -3,3 +3,4 @@
 monitordir: /var/local/mysql/monitor
 shelldir: /var/local/shell
 scp_port: 22
+send_host: 172.21.0.38
