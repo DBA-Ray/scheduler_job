@@ -1,5 +1,7 @@
 ---
-- hosts: mgr
+- hosts: mgr:localhost
   remote_user: root
+  vars:
+    initial: True
   roles:
     - dba_ray.scheduler_job

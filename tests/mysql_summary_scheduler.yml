@@ -1,0 +1,7 @@
+---
+- hosts: mgr:localhost
+  remote_user: root
+  vars:
+    execute_mysql_summary_job: True
+  roles:
+    - dba_ray.scheduler_job

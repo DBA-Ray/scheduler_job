@@ -5,6 +5,4 @@
     owner: root
     group: root
     mode: 0744
-
-- name: Execute job script file
-  shell: "sh -x {{ shelldir }}/pt-mysql-summary.sh {{ root_password }}"
+  when: ansible_hostname != "localhost"

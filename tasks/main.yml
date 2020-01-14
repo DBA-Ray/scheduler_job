@@ -1,5 +1,14 @@
 ---
 # tasks file for scheduler_job
-- include: password.yml
 
 - include: mysql-summary.yml
+  when: initial | default(False)
+
+- include: mysql-summary-send.yml
+  when: initial | default(False)
+
+- include: password.yml
+  when: execute_mysql_summary_job | default(False)
+
+- include: execute_mysql_summary_job.yml
+  when: execute_mysql_summary_job | default(False)

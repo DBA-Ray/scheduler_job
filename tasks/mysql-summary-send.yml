@@ -1,0 +1,17 @@
+- name: Add mysql-summary-send job
+  template:
+    src: mysql_summary_collect_send.sh.j2
+    dest: "{{ shelldir }}/mysql_summary_collect_send.sh"
+    owner: root
+    group: root
+    mode: 0744
+  when: ansible_hostname == "localhost"
+
+- name: Add main_summary_body for mail
+  copy:
+    src: main_summary_body.txt
+    dest: "{{ monitordir }}/main_summary_body.txt"
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_hostname == "localhost"
