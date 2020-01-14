@@ -1,8 +1,10 @@
 - name: Add mysql-summary job
-  shell: "pt-mysql-summary --user=root --password={{root_password}} > {{ monitordir }}/{{ ansible_hostname }}_summary_`date +%Y%m%d%H%M%S`.txt"
+  template:
+    src: pt-mysql-summary.sh.j2
+    dest: "{{ shelldir }}/pt-mysql-summary.sh"
+    owner: root
+    group: root
+    mode: 0744
 
-- name: Scp job file
-  shell: "scp -P {{ scp_port }} {{ monitordir }}/{{ ansible_hostname }}_summary_`date +%Y%m%d%H%M%S`.txt/$dailyfile root@proxysql1:/tmp/"
-
-- name: Delete expired job file
-  shell: "find {{ monitordir }}/ -mtime +2 -name "*.txt" -exec rm -rf {} \;"
+- name: Execute job script file
+  shell: "sh -x {{ shelldir }}/pt-mysql-summary.sh {{ root_password }}"

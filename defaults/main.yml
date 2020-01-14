@@ -1,4 +1,5 @@
 ---
 # defaults file for scheduler_job
 monitordir: /var/local/mysql/monitor
+shelldir: /var/local/shell
 scp_port: 22
