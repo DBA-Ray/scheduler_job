@@ -20,6 +20,6 @@ dailyfile={{ ansible_hostname }}_summary_`date +%Y%m%d%H%M%S`.txt
 
 /usr/bin/pt-mysql-summary --user=root --password=${1} > ${monitordir}/${dailyfile}
 
-scp -P ${scp_port} ${monitordir}/${dailyfile} root@{{ send_host }}:/tmp/
+scp -P ${scp_port} ${monitordir}/${dailyfile} root@{{ send_host }}:${monitordir}/{{ ansible_hostname }}_summary.txt
 
 find ${monitordir}/ -mtime +7 -name "*.txt" -exec rm -rf {} \;

@@ -5,7 +5,7 @@
     owner: root
     group: root
     mode: 0744
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname not in groups.mgr
 
 - name: Add main_summary_body for mail
   copy:
@@ -14,4 +14,4 @@
     owner: root
     group: root
     mode: 0644
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname not in groups.mgr

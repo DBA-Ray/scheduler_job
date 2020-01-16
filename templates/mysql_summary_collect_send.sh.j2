@@ -5,18 +5,6 @@ instance="生产环境MySql服务运行状态简报"
 
 dailydir={{ monitordir }}
 
-mailtitle=`date "+%Y年%m月%d日" -d "day"`$instance
-
-mgr1_latest=`ls -lt /tmp/mgr1_summary* |head -n 1|awk '{print $9}'`
-
-mgr2_latest=`ls -lt /tmp/mgr2_summary* |head -n 1|awk '{print $9}'`
-
-mgr3_latest=`ls -lt /tmp/mgr3_summary* |head -n 1|awk '{print $9}'`
-
-mv -f $mgr1_latest $dailydir/mgr1_summary.txt
-
-mv -f $mgr2_latest $dailydir/mgr2_summary.txt
-
-mv -f $mgr3_latest $dailydir/mgr3_summary.txt
+mailtitle=`date "+%Y年%m月%d日" -d "0 day"`$instance
 
 mail -a $dailydir/mgr1_summary.txt -a $dailydir/mgr2_summary.txt -a $dailydir/mgr3_summary.txt -v -s "$mailtitle" {{ recipient }} < $dailydir/main_summary_body.txt

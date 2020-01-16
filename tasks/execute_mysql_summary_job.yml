@@ -1,11 +1,7 @@
 - name: Execute pt-mysql-summary.sh
   shell: "sh -x {{ shelldir }}/pt-mysql-summary.sh {{ root_password }}"
-  when: ansible_hostname != "localhost"
-
-- name: Wait for file transfer to complete
-  pause: seconds=5
-  when: ansible_hostname = "localhost"
+  when: ansible_hostname in groups.mgr
 
 - name: Execute mysql_summary_collect_send.sh
   shell: "sh -x {{ shelldir }}/mysql_summary_collect_send.sh"
-  when: ansible_hostname = "localhost"
+  when: ansible_hostname not in groups.mgr

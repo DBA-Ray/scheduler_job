@@ -5,4 +5,4 @@
     owner: root
     group: root
     mode: 0744
-  when: ansible_hostname != "localhost"
+  when: ansible_hostname in groups.mgr

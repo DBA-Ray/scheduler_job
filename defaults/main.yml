@@ -2,5 +2,6 @@
 # defaults file for scheduler_job
 monitordir: /var/local/mysql/monitor
 shelldir: /var/local/shell
-scp_port: 22
+scp_port: 59410
 send_host: 172.21.0.38
+recipient: rulei@jjl.cn,zhangzhenjun@jjl.cn
