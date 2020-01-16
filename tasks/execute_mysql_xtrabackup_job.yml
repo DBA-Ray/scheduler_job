@@ -1,0 +1,5 @@
+- name: Execute backup.sh
+  shell: "{{ item }}"
+  with_items:
+    - "sh -x {{ backupdir }}/shell/backup.sh {{ root_password }}"
+  when: ansible_hostname not in groups.mgr

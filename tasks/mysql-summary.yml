@@ -1,8 +1,0 @@
-- name: Add mysql-summary job
-  template:
-    src: pt-mysql-summary.sh.j2
-    dest: "{{ shelldir }}/pt-mysql-summary.sh"
-    owner: root
-    group: root
-    mode: 0744
-  when: ansible_hostname in groups.mgr

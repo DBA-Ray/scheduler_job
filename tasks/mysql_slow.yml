@@ -1,0 +1,34 @@
+- name: Create a directory for monitor
+  file: >
+        path={{ monitordir }} state=directory owner=mysql group=mysql
+        path={{ shelldir }} state=directory owner=mysql group=mysql
+
+- name: Add mysql_slowdigest job
+  template:
+    src: mysql_slow_digest.sh.j2
+    dest: "{{ shelldir }}/mysql_slow_digest.sh"
+    owner: mysql
+    group: mysql
+    mode: 0744
+  when: ansible_hostname in groups.mgr
+
+- name: Add mysql_slow_collect_send job
+  template:
+    src: mysql_slow_collect_send.sh.j2
+    dest: "{{ shelldir }}/mysql_slow_collect_send.sh"
+    owner: mysql
+    group: mysql
+    mode: 0744
+  when: ansible_hostname not in groups.mgr
+
+- name: Copy the mail body file and example file
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: 'main_body.txt', dest: "{{ monitordir }}/main_body.txt" }
+    - { src: 'slow_digest_example.docx', dest: "{{ monitordir }}/slow_digest_example.docx" }
+  when: ansible_hostname not in groups.mgr

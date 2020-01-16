@@ -1,0 +1,10 @@
+#!/bin/sh
+#Author DBA R
+
+instance="生产环境慢SQL摘要"
+
+dailydir={{ monitordir }}
+
+mailtitle=`date "+%Y年%m月%d日" -d "-1 day"`$instance
+
+mail -a $dailydir/mgr1_slow.txt -a $dailydir/mgr2_slow.txt -a $dailydir/mgr3_slow.txt -a $dailydir/slow_digest_example.docx -v -s "$mailtitle" {{ recipient }} < $dailydir/main_body.txt

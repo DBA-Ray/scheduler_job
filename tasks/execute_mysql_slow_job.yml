@@ -1,7 +1,7 @@
 - name: Execute pt_mysql_summary.sh
-  shell: "sh -x {{ shelldir }}/pt_mysql_summary.sh {{ root_password }}"
+  shell: "sh -x {{ shelldir }}/mysql_slow_digest.sh {{ root_password }}"
   when: ansible_hostname in groups.mgr
 
 - name: Execute mysql_summary_collect_send.sh
-  shell: "sh -x {{ shelldir }}/mysql_summary_collect_send.sh"
+  shell: "sh -x {{ shelldir }}/mysql_slow_collect_send.sh"
   when: ansible_hostname not in groups.mgr

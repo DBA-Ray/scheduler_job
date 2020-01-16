@@ -1,14 +1,29 @@
 ---
 # tasks file for scheduler_job
 
-- include: mysql-summary.yml
-  when: initial | default(False)
+- include: mysql_summary.yml
+  when: initial_summary | default(False)
 
-- include: mysql-summary-send.yml
-  when: initial | default(False)
+- include: mysql_monitor.yml
+  when: initial_monitor | default(False)
+
+- include: mysql_xtrabackup.yml
+  when: initial_xtrabackup | default(False)
+
+- include: mysql_show.yml
+  when: initial_slow | default(False)
 
 - include: password.yml
-  when: execute_mysql_summary_job | default(False)
+  when: (execute_mysql_summary_job | default(False)) or (execute_mysql_monitor_job | default(False)) or (execute_mysql_xtrabackup_job | default(False))
 
 - include: execute_mysql_summary_job.yml
   when: execute_mysql_summary_job | default(False)
+
+- include: execute_mysql_monitor_job.yml
+  when: execute_mysql_monitor_job | default(False)
+
+- include: execute_mysql_xtrabackup_job.yml
+  when: execute_mysql_xtrabackup_job | default(False)
+
+- include: execute_mysql_slow_job.yml
+  when: execute_mysql_slow_job | default(False)

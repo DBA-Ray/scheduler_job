@@ -1,7 +1,15 @@
 ---
 # defaults file for scheduler_job
-monitordir: /var/local/mysql/monitor
-shelldir: /var/local/shell
+install_dir: /var/local
+basedir: "{{ install_dir }}/mysql"
+shelldir: "{{ install_dir }}/shell"
+monitordir: "{{ install_dir }}/monitor"
+backupdir: "{{ install_dir }}/backup"
+datadir: "{{ basedir }}/data"
+etcdir: "{{ basedir }}/etc"
+logdir: "{{ basedir }}/log"
+socket: /tmp/mysql.sock
+mysql_port: 3377
 scp_port: 59410
 send_host: 172.21.0.38
 recipient: rulei@jjl.cn,zhangzhenjun@jjl.cn
