@@ -18,7 +18,7 @@ monitordir={{ monitordir }}
 
 dailyfile={{ ansible_hostname }}_summary_`date +%Y%m%d%H%M%S`.txt
 
-/usr/bin/pt-mysql-summary --user=root --password=${1} > ${monitordir}/${dailyfile}
+/usr/bin/pt-mysql-summary --user=root --password=${1} --all-databases > ${monitordir}/${dailyfile}
 
 scp -P ${scp_port} ${monitordir}/${dailyfile} root@{{ send_host }}:${monitordir}/{{ ansible_hostname }}_summary.txt
 
