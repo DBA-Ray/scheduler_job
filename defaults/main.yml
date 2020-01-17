@@ -4,6 +4,8 @@ install_dir: /var/local
 basedir: "{{ install_dir }}/mysql"
 shelldir: "{{ install_dir }}/shell"
 monitordir: "{{ install_dir }}/monitor"
+# Archived base path
+xtrabackup_full: "{{ ansible_hostname }}_xxx_full"
 backupdir: "{{ install_dir }}/backup"
 datadir: "{{ basedir }}/data"
 etcdir: "{{ basedir }}/etc"
@@ -12,4 +14,5 @@ socket: /tmp/mysql.sock
 mysql_port: 3377
 scp_port: 59410
 send_host: 172.21.0.38
-recipient: rulei@jjl.cn,zhangzhenjun@jjl.cn
+recipient: rulei@jjl.cn
+#,zhangzhenjun@jjl.cn

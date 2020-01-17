@@ -57,7 +57,7 @@ function check_for_socket () {
         fi
 }
 
-check_for_socket
+#check_for_socket
 
 function mgr_status() {
 multi_single_whether=`mysql -h$4 -u$5 -p$6 -P$7 -e "show variables like '%group_replication_enforce_update_everywhere_checks%';" | grep group_replication_enforce_update_everywhere_checks | awk '{ print $2 }'`

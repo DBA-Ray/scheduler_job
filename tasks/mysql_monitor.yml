@@ -1,7 +1,5 @@
 - name: Create a directory for monitor
-  file: >
-        path={{ monitordir }} state=directory owner=mysql group=mysql
-        path={{ shelldir }} state=directory owner=mysql group=mysql
+  file: path={{ shelldir }} state=directory owner=mysql group=mysql
 
 - name: Rendering monitor script file
   template:
@@ -12,4 +10,4 @@
     mode: 0744
   with_items:
     - { src: 'alert_mgr_status.sh.j2', dest: '{{ shelldir }}/alert_mgr_status.sh' }
-    - { src: 'alert_slave_status.sh.j2', dest: '{{ shelldir }}"/alert_slave_status.sh' }
+    - { src: 'alert_slave_status.sh.j2', dest: '{{ shelldir }}/alert_slave_status.sh' }

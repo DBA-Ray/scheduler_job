@@ -1,8 +1,8 @@
 ---
-- hosts: mgr:localhost
+- hosts: localhost
   remote_user: root
   vars:
-    initial_monitor: True
-    initial_xtrabackup: True
+    initial_monitor: False
+    initial_xtrabackup: False
   roles:
     - dba_ray.scheduler_job

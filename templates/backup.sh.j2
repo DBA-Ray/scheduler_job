@@ -70,7 +70,7 @@ function check_status()
 
         echo 0 > ${monitor}
 
-        echo "备份中心物理备份失败，请及时查看备份日志！" | mail -a $logdir/${hostname}_${time}_*.log -v -s "备份状态邮件告知" rulei@jjl.cn 
+        echo "备份中心物理备份失败，请及时查看备份日志！" | mail -a $logdir/${hostname}_${time}_*.log -v -s "备份状态邮件告知" {{ recipient }} 
 
     fi
 

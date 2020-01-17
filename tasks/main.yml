@@ -10,7 +10,7 @@
 - include: mysql_xtrabackup.yml
   when: initial_xtrabackup | default(False)
 
-- include: mysql_show.yml
+- include: mysql_slow.yml
   when: initial_slow | default(False)
 
 - include: password.yml

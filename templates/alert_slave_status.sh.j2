@@ -57,7 +57,7 @@ function check_for_socket () {
         fi
 }
 
-check_for_socket
+#check_for_socket
 
 function slave_status() {
 local variable1=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
