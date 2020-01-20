@@ -1,8 +1,8 @@
 ---
 - hosts: localhost
   become: yes
-  become_method: sudo
-  remote_user: test
+  become_method: su
+  remote_user: root
   vars:
     execute_mysql_dump_job: True
   roles:
