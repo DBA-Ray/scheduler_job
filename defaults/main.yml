@@ -11,6 +11,8 @@ datadir: "{{ basedir }}/data"
 etcdir: "{{ basedir }}/etc"
 logdir: "{{ basedir }}/log"
 socket: /tmp/mysql.sock
+dbname: dxz
+binlog_index: "{{ datadir }}/mysql-bin.index"
 mysql_port: 3377
 scp_port: 59410
 send_host: 172.21.0.38

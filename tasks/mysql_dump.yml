@@ -1,0 +1,17 @@
+# Define automatic backup with xtrabackup
+- name: Create a directory for backup
+  file: path={{ item }} state=directory owner=mysql group=mysql
+  with_items:
+    - "{{ backupdir }}/shell"
+    - "{{ backupdir }}/dumpbak"
+
+- name: Rendering xtrabackup script file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: mysql
+    group: mysql
+    mode: 0744
+  with_items:
+    - { src: 'mysqldump.sh.j2', dest: "{{ backupdir }}/shell/mysqldump.sh" }
+    - { src: 'mysqldump_incr.sh.j2', dest: "{{ backupdir }}/shell/mysqldump_incr.sh" }

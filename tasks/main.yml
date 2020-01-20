@@ -10,11 +10,19 @@
 - include: mysql_xtrabackup.yml
   when: initial_xtrabackup | default(False)
 
+- include: mysql_dump.yml
+  when: initial_dump | default(False)
+
 - include: mysql_slow.yml
   when: initial_slow | default(False)
 
 - include: password.yml
-  when: (execute_mysql_summary_job | default(False)) or (execute_mysql_monitor_job | default(False)) or (execute_mysql_xtrabackup_job | default(False))
+  when: >
+        (execute_mysql_summary_job | default(False)) or
+        (execute_mysql_monitor_job | default(False)) or
+        (execute_mysql_xtrabackup_job | default(False)) or
+        (execute_mysql_dump_job | default(False)) or
+        (execute_mysql_dump_incr_job | default(False))
 
 - include: execute_mysql_summary_job.yml
   when: execute_mysql_summary_job | default(False)
@@ -24,6 +32,12 @@
 
 - include: execute_mysql_xtrabackup_job.yml
   when: execute_mysql_xtrabackup_job | default(False)
+
+- include: execute_mysql_dump.yml
+  when: execute_mysql_dump_job | default(False)
+
+- include: execute_mysql_dump_incr.yml
+  when: execute_mysql_dump_incr_job | default(False)
 
 - include: execute_mysql_slow_job.yml
   when: execute_mysql_slow_job | default(False)

@@ -2,8 +2,6 @@
 - hosts: localhost
   remote_user: root
   vars:
-    initial_monitor: False
-    initial_xtrabackup: False
-    initial_dump: False
+    execute_mysql_dump_job: True
   roles:
     - dba_ray.scheduler_job
