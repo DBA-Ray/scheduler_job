@@ -1,0 +1,7 @@
+---
+- hosts: proxysql
+  remote_user: root
+  vars:
+    execute_proxysql_monitor_job: True
+  roles:
+    - dba_ray.scheduler_job

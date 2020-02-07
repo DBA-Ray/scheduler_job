@@ -16,6 +16,9 @@
 - include: mysql_slow.yml
   when: initial_slow | default(False)
 
+- include: proxysql_monitor.yml
+  when: initial_proxysql_monitor | default(False)
+
 - include: password.yml
   when: >
         (execute_mysql_summary_job | default(False)) or
@@ -41,3 +44,6 @@
 
 - include: execute_mysql_slow_job.yml
   when: execute_mysql_slow_job | default(False)
+
+- include: execute_proxysql_monitor_job.yml
+  when: execute_proxysql_monitor_job | default(False)
