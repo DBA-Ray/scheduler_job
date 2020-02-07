@@ -67,7 +67,7 @@ else
 mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "select * from runtime_mysql_servers;select * from stats_mysql_connection_pool;"
 offline_mysql_count=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "select count(status) as count_offline_mysql from stats_mysql_connection_pool where status <> 'ONLINE'\G;" | grep count_offline_mysql: | awk '{ printf $2 }'`
 offline_mysql=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "select srv_host from stats_mysql_connection_pool where status <> 'ONLINE' limit 1\G;" | grep srv_host: | awk '{ printf $2 }'`
-if [ ${offline_mysql_count} -gt 1 ] ; then
+if [ ${offline_mysql_count} -gt 0 ] ; then
      SendMessageToDingding "Please be aware that ${offline_mysql} is offline!"
 fi
 fi
