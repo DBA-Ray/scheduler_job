@@ -1,5 +1,5 @@
 ---
-- hosts: proxysql:localhost
+- hosts: proxysql
   remote_user: root
   vars:
     initial_proxysql_monitor: False

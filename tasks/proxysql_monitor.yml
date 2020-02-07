@@ -1,9 +1,7 @@
-- name: Create a directory for monitor
+- name: Create a directory for proxysql monitor
   file: path={{ shelldir }} state=directory owner=proxysql group=proxysql
-  delegate_to: "{{item}}"
-  with_items: "{{ groups['proxysql'] }}"
 
-- name: Rendering monitor script file
+- name: Rendering proxysql monitor script file
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -12,5 +10,3 @@
     mode: 0744
   with_items:
     - { src: 'alert_proxysql_status.sh.j2', dest: '{{ shelldir }}/alert_proxysql_status.sh' }
-  delegate_to: "{{item}}"
-  with_items: "{{ groups['proxysql'] }}"

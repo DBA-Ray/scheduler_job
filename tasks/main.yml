@@ -25,7 +25,8 @@
         (execute_mysql_monitor_job | default(False)) or
         (execute_mysql_xtrabackup_job | default(False)) or
         (execute_mysql_dump_job | default(False)) or
-        (execute_mysql_dump_incr_job | default(False))
+        (execute_mysql_dump_incr_job | default(False)) or
+        (execute_proxysql_monitor_job | default(False))
 
 - include: execute_mysql_summary_job.yml
   when: execute_mysql_summary_job | default(False)
