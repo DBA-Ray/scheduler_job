@@ -8,13 +8,16 @@
     - "{{ monitordir }}"
     - "{{ shelldir }}"
 
-- name: Add mysql_slowdigest job
+- name: Add mysql_slowdigest job and logrotate for mysql error log
   template:
-    src: mysql_slow_digest.sh.j2
-    dest: "{{ shelldir }}/mysql_slow_digest.sh"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     owner: mysql
     group: mysql
     mode: 0744
+  with_items:
+    - { src: 'mysql_slow_digest.sh.j2', dest: "{{ shelldir }}/mysql_slow_digest.sh" }
+    - { src: 'mysql.j2', dest: '/etc/logrotate.d/mysql'}
   when: ansible_hostname in groups.mgr
 
 - name: Add mysql_slow_collect_send job

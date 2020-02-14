@@ -1,0 +1,10 @@
+{{ logdir }}/mysqld.log {
+missingok
+weekly
+dateext
+notifempty
+compress
+delaycompress
+create 0640 mysql mysql
+rotate 7
+}

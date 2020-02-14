@@ -46,5 +46,8 @@
 - include: execute_mysql_slow_job.yml
   when: execute_mysql_slow_job | default(False)
 
+- include: execute_mysql_error_job.yml
+  when: execute_mysql_error_job | default(False)
+
 - include: execute_proxysql_monitor_job.yml
   when: execute_proxysql_monitor_job | default(False)
