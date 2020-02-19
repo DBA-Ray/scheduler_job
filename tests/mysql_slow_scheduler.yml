@@ -1,5 +1,5 @@
 ---
-- hosts: mgr:localhost
+- hosts: mysql:mgr:localhost
   remote_user: root
   vars:
     execute_mysql_slow_job: True
