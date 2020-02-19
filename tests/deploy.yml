@@ -1,5 +1,5 @@
 ---
-- hosts: mysql:localhost
+- hosts: mysql:!mgr:localhost
   remote_user: root
   vars:
     initial_summary: False
