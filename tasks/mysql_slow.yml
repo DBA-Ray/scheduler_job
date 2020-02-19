@@ -17,7 +17,8 @@
     mode: 0744
   with_items:
     - { src: 'mysql_slow_digest.sh.j2', dest: "{{ shelldir }}/mysql_slow_digest.sh" }
-  when: ansible_hostname in groups.mgr
+  #when: ansible_hostname in groups.mgr
+  when: ansible_hostname != localhost
 
 - name: Add logrotate for mysql error log
   template:
