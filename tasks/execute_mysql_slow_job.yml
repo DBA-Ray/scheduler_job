@@ -1,4 +1,4 @@
-- name: Execute pt_mysql_summary.sh
+- name: Execute mysql_slow_digest.sh
   shell: "sh -x {{ shelldir }}/mysql_slow_digest.sh"
   when: >
         (ansible_hostname in groups.mgr) or
