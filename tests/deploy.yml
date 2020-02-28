@@ -1,8 +1,9 @@
 ---
-- hosts: mysql:!mgr:localhost
+- hosts: mysql:mgr:localhost
   remote_user: root
   vars:
     initial_summary: False
     initial_slow: False
+    initial_mysql_defragment: False
   roles:
     - dba_ray.scheduler_job

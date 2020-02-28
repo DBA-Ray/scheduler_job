@@ -19,6 +19,9 @@
 - include: proxysql_monitor.yml
   when: initial_proxysql_monitor | default(False)
 
+- include: mysql_defragment.yml
+  when: initial_mysql_defragment | default(False)
+
 - include: password.yml
   when: >
         (execute_mysql_summary_job | default(False)) or
@@ -26,7 +29,8 @@
         (execute_mysql_xtrabackup_job | default(False)) or
         (execute_mysql_dump_job | default(False)) or
         (execute_mysql_dump_incr_job | default(False)) or
-        (execute_proxysql_monitor_job | default(False))
+        (execute_proxysql_monitor_job | default(False)) or
+        (execute_mysql_defragment_job | default(False))
 
 - include: execute_mysql_summary_job.yml
   when: execute_mysql_summary_job | default(False)
@@ -51,3 +55,6 @@
 
 - include: execute_proxysql_monitor_job.yml
   when: execute_proxysql_monitor_job | default(False)
+
+- include: execute_mysql_defragment_job.yml
+  when: execute_mysql_defragment_job | default(False)

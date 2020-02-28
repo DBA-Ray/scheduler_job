@@ -1,0 +1,43 @@
+#/bin/bash
+
+if [ $# -ne 1 ]
+
+then
+
+    echo "usage: `basename $0` [root_password]"
+
+    exit 1
+
+fi
+
+time_start=`date +%s`
+
+log_date=`date +"%Y%m%d"`
+
+original_sql="SELECT ROUND(sum(data_free)/1024/1024,2) as data_free FROM information_schema.TABLES WHERE DATA_FREE >= 10*1024*1024\G;"
+
+variable_table_sql="SELECT CONCAT(table_schema,'.',table_name) table_name FROM information_schema.TABLES WHERE DATA_FREE >= 10*1024*1024 ORDER BY DATA_FREE desc;"
+
+original_fragment_size=`mysql -uroot -p${1} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
+
+echo "Start defragmenting at `date +"%Y-%m-%d %H:%M:%S"`,The original frament size is ${original_fragment_size}MB." > /tmp/defragment_table_${log_date}.log
+
+table_list=`mysql -uroot -p${1} -e "${variable_table_sql}" | grep -v 'table_name'`
+
+for i in ${table_list}
+
+do
+
+echo `date +"%Y-%m-%d %H:%M:%S"` "alter table ${i} engine=innodb ..." >> /tmp/defragment_table_${log_date}.log
+
+mysql -uroot -p${1} -e "alter table ${i} engine=innodb;"
+
+done
+
+time_end=`date +%s`
+
+times=$((${time_end}-${time_start}))
+
+fragment_size=`mysql -uroot -p${1} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
+
+echo "Finsh defragmenting at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to defragment tables.The frament size is ${fragment_size}MB" >> /tmp/defragment_table_${log_date}.log

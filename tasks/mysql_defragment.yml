@@ -1,0 +1,13 @@
+- name: Create a directory for defragmenting mysql tables
+  file: path={{ shelldir }} state=directory owner=mysql group=mysql
+
+- name: Rendering defragment mysql tables script file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: mysql
+    group: mysql
+    mode: 0744
+  with_items:
+    - { src: 'mysql_defragment_tables.sh.j2', dest: '{{ shelldir }}/mysql_defragment_tables.sh' }
+  when: ansible_hostname = mgr1
