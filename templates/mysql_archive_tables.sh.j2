@@ -1,0 +1,48 @@
+#/bin/bash
+
+if [ $# -ne 1 ]
+
+then
+
+    echo "usage: `basename $0` [root_password]"
+
+    exit 1
+
+fi
+
+declare -A dic
+
+dic=({{ archiver_dic }})
+
+source_info=({{ source_info }})
+
+dest_info=({{ dest_info }})
+
+socket={{ socket }}
+
+log_date=`date +"%Y%m%d"`
+
+time_start=`date +%s`
+
+echo "Start archiving at `date +"%Y-%m-%d %H:%M:%S"`." > /tmp/archive_table_${log_date}.log
+
+for key in $(echo ${!dic[*]})
+
+do
+
+source_table="h=${source_info[0]},P=${source_info[1]},u=root,p=${1},D=${source_info[2]},t=${key},A=utf8mb4"
+
+dest_table="h=${dest_info[0]},P=${dest_info[1]},u=root,p=${1},D=${dest_info[2]},t=${key}_arc,A=utf8mb4"
+
+mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "create table if not exists ${dest_info[2]}.${key}_arc like ${source_info[2]}.${key};"
+
+pt-archiver --source ${source_table} --dest ${dest_table} --socket=${socket} --where="${dic[$key]}" --txn-size=10000 --limit=10000 --progress=10000 \
+--statistics --ignore --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
+
+done
+
+time_end=`date +%s`
+
+times=$((${time_end}-${time_start}))
+
+echo "Finsh archiving at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to archive tables." >> /tmp/archive_table_${log_date}.log
