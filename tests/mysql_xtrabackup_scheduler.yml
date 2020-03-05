@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: slave_monitor
   remote_user: root
   vars:
     execute_mysql_xtrabackup_job: True
