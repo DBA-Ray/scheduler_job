@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: slave_monitor
   remote_user: root
   vars:
     initial_monitor: False
