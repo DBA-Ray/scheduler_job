@@ -12,7 +12,7 @@ then
 
 fi
 
-source /etc/profile ##加载环境变量，否则在crontab任务里会存在问题
+#source /etc/profile ##加载环境变量，否则在crontab任务里会存在问题
 
 time=`date "+%Y%m%d_%H%M%S"`
 
@@ -27,6 +27,8 @@ backupdir={{ backupdir }}
 monitor="$backupdir/monitor/mysql_hotbackup_status.txt" ##zabbix监控文件
 
 shelldir={{ backupdir }}/shell
+
+logdir="$backupdir/log/xtrabackup_log"
 
 ##几点开始全量备份，不等于这个时间做增量备份
 n=070001
