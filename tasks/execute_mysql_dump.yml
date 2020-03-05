@@ -2,4 +2,3 @@
   shell: "{{ item }}"
   with_items:
     - "sh -x {{ shelldir }}/mysqldump.sh {{ root_password }}"
-  when: ansible_hostname not in groups.mgr

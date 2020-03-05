@@ -1,7 +1,7 @@
 ---
-- hosts: slave_monitor
+- hosts: mgr1
   remote_user: root
   vars:
-    execute_mysql_dump_job: True
+    execute_mysql_archive_job: True
   roles:
     - dba_ray.scheduler_job

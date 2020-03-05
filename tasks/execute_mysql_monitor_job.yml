@@ -3,4 +3,3 @@
   with_items:
     - "sh -x {{ shelldir }}/alert_mgr_status.sh {{ mysql_monitor_password }}"
     - "sh -x {{ shelldir }}/alert_slave_status.sh {{ mysql_monitor_password }}"
-  when: ansible_hostname not in groups.mgr
