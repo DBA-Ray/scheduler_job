@@ -4,4 +4,4 @@
 
 - name: Execute mysql_summary_collect_send.sh
   shell: "sh -x {{ shelldir }}/mysql_summary_collect_send.sh"
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname == "ansible"

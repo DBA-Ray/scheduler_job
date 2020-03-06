@@ -50,7 +50,7 @@ function check_for_socket () {
                 tmp_localip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|grep -v 172.17|grep -v 172.18|awk '{print $2}'|tr -d "addr:"`
                 localip=`echo $tmp_localip|awk '{print $1}'|sed -n '1p'`
                 echo "No valid socket file "$socket" found!"
-                echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
+                #echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
                 SendMessageToDingding "mysqld is not running or it is installed in a custom location on server $localip"
                 echo "Please set the $socket variable at the top of this script."
                 exit 1
@@ -100,17 +100,17 @@ echo ${LAST_ERROR_MESSAGE}
 fi
 
 if [ -z ${member_state} ] ; then
-        echo -e "MGR is not configured or you do not have the required access to MySQL on server "$1"!"|mail -v -s "$1" rulei@jjl.cn
+       #echo -e "MGR is not configured or you do not have the required access to MySQL on server "$1"!"|mail -v -s "$1" rulei@jjl.cn
         SendMessageToDingding "MGR is not configured or you do not have \nthe required access to MySQL on server "$1"!"   
 fi
 
 if [ "${member_state}" != "ONLINE" ] ; then
-        echo -e "Please be aware that member_state is \"${member_state}\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn
+       #echo -e "Please be aware that member_state is \"${member_state}\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn
         SendMessageToDingding "Please be aware that member_state is ${member_state} with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""  
 fi
 
 if [ ${VARIABLE_READ} == 'ON' ] ; then
-        echo -e "Please be aware that the super_read_only is \"ON\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn     
+       #echo -e "Please be aware that the super_read_only is \"ON\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn     
        SendMessageToDingding "Please be aware that the super_read_only is ON \nwith group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""
 fi
 
@@ -124,7 +124,7 @@ export "$1"=$variable
 function performance_status_alert () {
 
 if [ "$1" -gt 1 ];then
-        echo -e "The count_transactions_in_queue is \"$1\",please be aware that there is a problem with group replication on server $2!" | mail -v -s "$2"  rulei@jjl.cn
+       #echo -e "The count_transactions_in_queue is \"$1\",please be aware that there is a problem with group replication on server $2!" | mail -v -s "$2"  rulei@jjl.cn
         SendMessageToDingding "The count_transactions_in_queue is "$1",\nplease be aware that there is delay with group replication on server $2!"
 fi
 }

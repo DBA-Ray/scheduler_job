@@ -50,7 +50,7 @@ function check_for_socket () {
 		        tmp_localip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|grep -v 172.17|grep -v 172.18|awk '{print $2}'|tr -d "addr:"`
                 localip=`echo $tmp_localip|awk '{print $1}'|sed -n '1p'`
                 echo "No valid socket file "$socket" found!"
-                echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
+                #echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
                 SendMessageToDingding "mysqld is not running or it is installed in a custom location on server $localip"
                 echo "Please set the $socket variable at the top of this script."
                 exit 1
@@ -79,18 +79,18 @@ echo ${Last_Error}
 fi
 
 if [ -z $1 -o -z $2 ] ; then
-        echo "Replication is not configured or you do not have the required access to MySQL on server $3!"|mail -v -s "$3" rulei@jjl.cn
+        #echo "Replication is not configured or you do not have the required access to MySQL on server $3!"|mail -v -s "$3" rulei@jjl.cn
 		SendMessageToDingding "Replication is not configured \nor you do not have the required access to MySQL on server $3!"
 fi
 
 if [ $2 == 'No' ] ; then
-        echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
+        #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
         SendMessageToDingding "SQL thread not running on server $3!\nLast Error:${Last_Error}"
 elif [ $1 == 'No' ] ; then
-        echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
+        #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
         SendMessageToDingding "IO thread not running on server $3!\nLast Error:${Last_Error}"
 elif [ $1 == 'No' ] && [ $2 == 'No' ] ; then
-        echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
+        #echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
         SendMessageToDingding "Replication slave is inactive on server $3!\nLast Error:${Last_Error}"
 fi
 }
@@ -125,12 +125,12 @@ export "$1"=$variable
 function slave_delay_status_alert () {
 
 if [ "$1" = 'NULL' ] || [ "$1" = '' ] ; then
-	echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
+       #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
 	SendMessageToDingding "Unknown Offset - perhaps slave is stopped or not configured on server $3"
 fi
 
 if [ "$1" -gt 3 ];then
-        echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
+       #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
         SendMessageToDingding "The data replication latency is "$2"!\nso keep an eye on server $3"
 fi
 }

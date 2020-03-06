@@ -15,7 +15,7 @@
     owner: mysql
     group: mysql
     mode: 0744
-  when: ansible_hostname != "localhost"
+  when: ansible_hostname != "ansible"
 
 - name: Add mysql_summary_collect_send job
   template:
@@ -24,7 +24,7 @@
     owner: mysql
     group: mysql
     mode: 0744
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname == "ansible"
 
 - name: Add main_summary_body for mail
   copy:
@@ -33,4 +33,4 @@
     owner: mysql
     group: mysql
     mode: 0644
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname == "ansible"
