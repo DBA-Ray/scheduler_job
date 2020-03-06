@@ -1,4 +1,4 @@
-- name: Execute alert_mgr_status.sh and alert_slave_status.sh
+- name: Execute mysqldump.sh
   shell: "{{ item }}"
   with_items:
-    - "sh -x {{ shelldir }}/mysqldump.sh {{ root_password }}"
+    - "sh -x {{ backupdir }}/shell/mysqldump.sh {{ root_password }}"

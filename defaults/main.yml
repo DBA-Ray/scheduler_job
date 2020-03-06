@@ -13,6 +13,8 @@ logdir: "{{ basedir }}/log"
 # Mysqldump info
 dbname: dxz
 binlog_index: "{{ datadir }}/mysql-bin.index"
+restore_host: 10.0.64.6
+restore_host_port: 58241
 # Mysql connection info
 mysql_port: 3377
 socket: /tmp/mysql.sock
