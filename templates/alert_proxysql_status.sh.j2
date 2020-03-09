@@ -62,12 +62,17 @@ function check_for_socket () {
 function proxysql_status() {
 offline_proxysql=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "\s" | grep Uptime: | awk '{ printf $2$3 }'`
 if [ -z ${offline_proxysql} ] ; then
-        SendMessageToDingding "proxysql is not running on server {{ ansible_hostname }}"
+        SendMessageToDingding "proxysql is not running on server {{ ansible_hostname }} in env_{{ business_env }}"
 else
-offline_mysql_count=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "select count(status) as count_offline_mysql from stats_mysql_connection_pool where status <> 'ONLINE'\G;" | grep count_offline_mysql: | awk '{ printf $2 }'`
-offline_mysql=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "select srv_host from stats_mysql_connection_pool where status <> 'ONLINE' limit 1\G;" | grep srv_host: | awk '{ printf $2 }'`
+mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password \
+-e "select * from runtime_mysql_servers;select * from runtime_mysql_servers;"
+offline_mysql_count=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password \
+-e "select count(status) as count_offline_mysql from stats_mysql_connection_pool where status <> 'ONLINE'\G;"\
+ | grep count_offline_mysql: | awk '{ printf $2 }'`
+offline_mysql=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password \
+-e "select srv_host from stats_mysql_connection_pool where status <> 'ONLINE' limit 1\G;" | grep srv_host: | awk '{ printf $2 }'`
 if [ ${offline_mysql_count} -gt 0 ] ; then
-     SendMessageToDingding "Please be aware that ${offline_mysql} is offline!"
+     SendMessageToDingding "Please be aware that ${offline_mysql} is offline in env_{{ business_env }}!"
 fi
 fi
 }

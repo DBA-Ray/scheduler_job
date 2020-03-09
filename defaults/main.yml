@@ -1,4 +1,6 @@
 ---
+# environment variable
+business_env: pro
 # defaults file for scheduler_job
 install_dir: /var/local
 basedir: "{{ install_dir }}/mysql"
