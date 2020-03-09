@@ -20,3 +20,10 @@
     - { src: 'backup.sh.j2', dest: "{{ backupdir }}/shell/backup.sh" }
     - { src: 'mysql_xtrabackup.sh.j2', dest: "{{ backupdir }}/shell/mysql_xtrabackup.sh" }
     - { src: 'xtra_data_archiving.sh.j2', dest: "{{ backupdir }}/shell/xtra_data_archiving.sh" }
+
+- name: Add log polling task schedule for xtrabackup
+  cron:
+    name: "logrotate"
+    minute: "0"
+    hour: "*/1"
+    job: "/var/local/shell/backup.sh > /dev/null 2>&1 &"
