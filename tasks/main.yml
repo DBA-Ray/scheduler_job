@@ -7,6 +7,9 @@
 - include: mysql_monitor.yml
   when: initial_monitor | default(False)
 
+- include: password.yml
+  when: initial_xtrabackup | default(False)
+
 - include: mysql_xtrabackup.yml
   when: initial_xtrabackup | default(False)
 
@@ -34,8 +37,7 @@
         (execute_mysql_dump_incr_job | default(False)) or
         (execute_proxysql_monitor_job | default(False)) or
         (execute_mysql_defragment_job | default(False)) or
-        (execute_mysql_archive_job | default(False)) or
-        (initial_xtrabackup | default(False))
+        (execute_mysql_archive_job | default(False))
 
 - include: execute_mysql_summary_job.yml
   when: execute_mysql_summary_job | default(False)
