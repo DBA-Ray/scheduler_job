@@ -1,4 +1,4 @@
 - name: Execute mysqldump_incr.sh
   shell: "{{ item }}"
   with_items:
-    - "sh -x {{ backupdir }}/shell/mysqldump_incr.sh {{ root_password }}"
+    - "sh -x {{ backupdir }}/shell/mysqldump_incr.sh '{{ root_password }}'"

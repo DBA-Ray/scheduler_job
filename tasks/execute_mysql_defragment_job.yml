@@ -1,4 +1,4 @@
 - name: Execute mysql_defragment_tables.sh
   shell: "{{ item }}"
   with_items:
-    - "sh -x {{ shelldir }}/mysql_defragment_tables.sh {{ root_password }}"
+    - "sh -x {{ shelldir }}/mysql_defragment_tables.sh '{{ root_password }}'"
