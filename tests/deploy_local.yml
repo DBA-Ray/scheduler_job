@@ -2,6 +2,6 @@
 - hosts: localhost
   remote_user: root
   vars:
-    execute_mysql_monitor_job: True
+    initial_monitor: False
   roles:
     - dba_ray.scheduler_job
