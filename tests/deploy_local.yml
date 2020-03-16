@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: ansible
   remote_user: root
   vars:
     initial_monitor: False
