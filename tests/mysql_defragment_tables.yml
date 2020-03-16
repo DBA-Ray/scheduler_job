@@ -1,5 +1,5 @@
 ---
-- hosts: mgr1
+- hosts: "{{ primary_hostname }}"
   remote_user: root
   vars:
     execute_mysql_defragment_job: True

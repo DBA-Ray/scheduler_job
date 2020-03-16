@@ -1,5 +1,5 @@
 ---
-- hosts: mysql:mgr_pro1:mgr_pro2:ansible
+- hosts: mgr_pro1:mgr_pro2:ansible
   remote_user: root
   vars:
     execute_mysql_summary_job: True

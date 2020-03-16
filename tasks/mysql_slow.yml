@@ -17,7 +17,7 @@
     mode: 0744
   with_items:
     - { src: 'mysql_slow_digest.sh.j2', dest: "{{ shelldir }}/mysql_slow_digest.sh" }
-  when: ansible_hostname != "localhost"
+  when: ansible_hostname != "ansible"
 
 - name: Add logrotate for mysql error log
   template:
@@ -28,7 +28,7 @@
     mode: 0640
   with_items:
     - { src: 'mysql.j2', dest: '/etc/logrotate.d/mysql'}
-  when: ansible_hostname != "localhost"
+  when: ansible_hostname != "ansible"
 
 - name: Add mysql_slow_collect_send job
   template:
@@ -37,7 +37,7 @@
     owner: mysql
     group: mysql
     mode: 0744
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname == "ansible"
 
 - name: Copy the mail body file and example file
   copy:
@@ -49,4 +49,4 @@
   with_items:
     - { src: 'main_body.txt', dest: "{{ monitordir }}/main_body.txt" }
     - { src: 'slow_digest_example.docx', dest: "{{ monitordir }}/slow_digest_example.docx" }
-  when: ansible_hostname == "localhost"
+  when: ansible_hostname == "ansible"

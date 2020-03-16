@@ -1,4 +1,4 @@
 - name: Execute alert_proxysql_status.sh
   shell: "{{ item }}"
   with_items:
-    - "sh -x {{ shelldir }}/alert_proxysql_status.sh \'{{ admin_login_password }}\'"
+    - "sh -x {{ shelldir }}/alert_proxysql_status.sh '{{ admin_login_password }}'"
