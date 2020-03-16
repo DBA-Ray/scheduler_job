@@ -1,0 +1,8 @@
+---
+- hosts: "{{ primary_hostname }}"
+  remote_user: root
+  vars:
+    initial_mysql_defragment: False
+    initial_mysql_archive: False
+  roles:
+    - dba_ray.scheduler_job

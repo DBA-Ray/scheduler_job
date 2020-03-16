@@ -4,7 +4,5 @@
   vars:
     initial_summary: False
     initial_slow: False
-    initial_mysql_defragment: False
-    initial_mysql_archive: False
   roles:
     - dba_ray.scheduler_job
