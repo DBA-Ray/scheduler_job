@@ -11,7 +11,7 @@ then
 
 fi
 
-#source /etc/profile
+source /etc/profile
 
 time_start=`date +%s`
 
@@ -22,7 +22,7 @@ dbname={{ dbname }}
 backupdir={{ backupdir }}/dumpbak
 
 mysqlpump -uroot -p${1} -B ${dbname} --single-transaction --set-gtid-purged=off --skip-definer \
---add-drop-database --add-drop-table --default-parallelism=16 > ${backupdir}/${dbname}_${dumptime}.sql
+--add-drop-table --default-parallelism=16 > ${backupdir}/${dbname}_${dumptime}.sql
 
 time_end=`date +%s`
 
