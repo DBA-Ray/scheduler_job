@@ -1,18 +1,31 @@
+#- name: Specify target database
+#  lineinfile:
+#   path: "{{ restore_target_data }}"
+#    regexp: '^USE'
+#    line: "USE `{{ restore_target_database }}`;"
+#  when: restore_diff_database
+
 - name: Specify target database
-  lineinfile:
-    path: "{{ restore_target_data }}"
-    regexp: "'^USE `{{ dbname }}`;'"
-    line: "USE `{{ restore_target_database }}`;"
-  with_items:
-    - "{{ restore_target_data }}"
+  shell: "sed -i 's|USE `{{ dbname }}`;|USE `{{ restore_target_database }}`;|g' {{ restore_target_data }}"
   when: restore_diff_database
 
-- name: Import data
-  mysql_db:
-    login_user: root
-    login_password: "{{ root_password }}"
-    login_port: "{{ mysql_port }}"
-    login_unix_socket: "{{ socket }}"
-    state: import
-    name: "{{ restore_target_database }}"
-    target: "{{ restore_target_data }}"
+#- name: 复制安装包
+#  copy:
+#    src: "{{ basedir }}/bin/mysql"
+#    dest: /usr/sbin
+#    owner: root
+#    group: root
+#    mode: 0744 
+
+#- name: Import data
+#  mysql_db:
+#    login_user: root
+#    login_password: "{{ root_password }}"
+#    login_port: "{{ mysql_port }}"
+#    login_unix_socket: "{{ socket }}"
+#    state: import
+#    name: "{{ restore_target_database }}"
+#    target: "{{ restore_target_data }}"
+
+- name: Import data via mysql
+  shell: "time {{ basedir }}/bin/mysql -uroot -p'{{ root_password }}' < {{ restore_target_data }}"

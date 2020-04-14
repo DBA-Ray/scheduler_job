@@ -19,7 +19,7 @@ dbname: dxz
 binlog_index: "{{ datadir }}/mysql-bin.index"
 restore_host: 10.0.64.6
 restore_host_port: 58241
-set_gtid_purged: off
+set_gtid_purged: 'off'
 # Mysqlrestore info
 restore_diff_database: True
 restore_target_data_name: dxz414.sql
