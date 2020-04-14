@@ -1,0 +1,4 @@
+- name: Execute mysqldump.sh
+  shell: "{{ item }}"
+  with_items:
+    - "sh -x {{ backupdir }}/shell/mysqldump.sh /'{{ root_password }}/'"

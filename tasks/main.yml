@@ -34,7 +34,9 @@
         (execute_mysql_monitor_job | default(False)) or
         (execute_mysql_xtrabackup_job | default(False)) or
         (execute_mysql_dump_job | default(False)) or
+        (execute_mysql_pump_job | default(False)) or
         (execute_mysql_dump_incr_job | default(False)) or
+        (execute_mysql_restore_job | default(False)) or
         (execute_proxysql_monitor_job | default(False)) or
         (execute_mysql_defragment_job | default(False)) or
         (execute_mysql_archive_job | default(False))
@@ -48,11 +50,17 @@
 - include: execute_mysql_xtrabackup_job.yml
   when: execute_mysql_xtrabackup_job | default(False)
 
-- include: execute_mysql_dump.yml
+- include: execute_mysql_dump_job.yml
   when: execute_mysql_dump_job | default(False)
+  
+- include: execute_mysql_pump_job.yml
+  when: execute_mysql_pump_job | default(False)
 
-- include: execute_mysql_dump_incr.yml
+- include: execute_mysql_dump_incr_job.yml
   when: execute_mysql_dump_incr_job | default(False)
+
+- include: execute_mysql_restore_job.yml
+  when: execute_mysql_restore_job | default(False)
 
 - include: execute_mysql_slow_job.yml
   when: execute_mysql_slow_job | default(False)

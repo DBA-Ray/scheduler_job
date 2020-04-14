@@ -1,0 +1,4 @@
+- name: Execute mysqlpump.sh
+  shell: "{{ item }}"
+  with_items:
+    - "sh -x {{ backupdir }}/shell/mysqlpump.sh /'{{ root_password }}/'"

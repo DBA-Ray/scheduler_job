@@ -1,0 +1,18 @@
+#- name: Specify target database
+#  lineinfile:
+#    path: "{{ restore_target_data }}"
+#    regexp: '^USE `dxz`;'
+#    line: "USE `{ target_database }}`;"
+#  with_items:
+#    - "{{ restore_target_data }}"
+#    - "{{ restore_target_ret }}"
+
+- name: Import data
+  mysql_db:
+    login_user: root
+    login_password: "{{ root_password }}"
+    login_port: "{{ mysql_port }}"
+    login_unix_socket: "{{ socket }}"
+    state: import
+    name: "{{ target_database }}"
+    target: "{{ restore_target_data }}"
