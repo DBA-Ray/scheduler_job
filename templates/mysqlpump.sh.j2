@@ -21,8 +21,8 @@ dbname={{ dbname }}
 
 backupdir={{ backupdir }}/dumpbak
 
-mysqlpump -uroot -p${1} -B ${dbname} --single-transaction --set-gtid-purged=off --skip-definer \
---add-drop-table --default-parallelism=16 > ${backupdir}/${dbname}_${dumptime}.sql
+mysqlpump -uroot -p${1} -B ${dbname} --single-transaction --set-gtid-purged={{ set_gtid_purged }} --skip-definer \
+--add-drop-database --add-drop-table --default-parallelism=16 > ${backupdir}/${dbname}_${dumptime}.sql
 
 time_end=`date +%s`
 
@@ -32,7 +32,7 @@ echo "It takes ${use_time} seconds to backup the ${dbname} backup!!!"
 
 cd ${backupdir}
 
-scp -P {{ restore_host_port }} ${dbname}_${dumptime}.sql root@{{ restore_host }}:/tmp
+scp -P {{ restore_host_port }} ${dbname}_${dumptime}.sql root@{{ restore_host }}:{{ restore_target_data}}
 
 #tar -zcvf ${backupdir}/${dbname}_${dumptime}.tgz ${dbname}_${dumptime}.sql ${dbname}_RET_${dumptime}.sql
 

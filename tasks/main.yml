@@ -52,7 +52,7 @@
 
 - include: execute_mysql_dump_job.yml
   when: execute_mysql_dump_job | default(False)
-  
+
 - include: execute_mysql_pump_job.yml
   when: execute_mysql_pump_job | default(False)
 
