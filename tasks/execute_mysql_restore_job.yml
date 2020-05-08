@@ -9,13 +9,13 @@
   shell: "sed -i 's|USE `{{ dbname }}`;|USE `{{ restore_target_database }}`;|g' {{ restore_target_data }}"
   when: restore_diff_database
 
-#- name: 复制安装包
+#- name: Copy mysql client to "/usr/sbin" for mysql module
 #  copy:
 #    src: "{{ basedir }}/bin/mysql"
 #    dest: /usr/sbin
 #    owner: root
 #    group: root
-#    mode: 0744 
+#    mode: 0744
 
 #- name: Import data
 #  mysql_db:
