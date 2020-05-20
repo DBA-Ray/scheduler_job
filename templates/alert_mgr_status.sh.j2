@@ -59,6 +59,11 @@ function check_for_socket () {
 
 #check_for_socket
 
+function check_for_uptime () {
+local variable=`mysql -h$2 -u$3 -p$4 -P$5 -e "\s;" | grep Uptime: | awk '{ printf $2$3 }'`
+export "$1"=$variable
+}
+
 function mgr_status() {
 multi_single_whether=`mysql -h$4 -u$5 -p$6 -P$7 -e "show variables like '%group_replication_enforce_update_everywhere_checks%';" | grep group_replication_enforce_update_everywhere_checks | awk '{ print $2 }'`
 if [ $multi_single_whether == 'OFF' ]
@@ -133,12 +138,18 @@ grep -v "^$" /etc/hosts|grep -v "^#"|grep mgr|awk '{print $1,$2}'| while read ip
 
 do
 
- mgr_status member_state VARIABLE_READ LAST_ERROR_MESSAGE ${ip} repl ${monitor_passwd} {{ mysql_port }}
+check_for_uptime server_uptime ${ip} repl ${monitor_passwd} {{ mysql_port }}
 
- mgr_status_alert Alert_${hostname}_{{ business_env }}
+if [ -z ${server_uptime} ] ; then
+        SendMessageToDingding "mysql is not running on server ${hostname} in env_{{ business_env }}"
+else
 
- performance_status count_transactions_in_queue ${ip} repl ${monitor_passwd} {{ mysql_port }}
+mgr_status member_state VARIABLE_READ LAST_ERROR_MESSAGE ${ip} repl ${monitor_passwd} {{ mysql_port }}
 
- performance_status_alert ${count_transactions_in_queue} Alert_${hostname}_{{ business_env }}
+mgr_status_alert Alert_${hostname}_{{ business_env }}
+
+performance_status count_transactions_in_queue ${ip} repl ${monitor_passwd} {{ mysql_port }}
+
+performance_status_alert ${count_transactions_in_queue} Alert_${hostname}_{{ business_env }}
 
 done

@@ -59,6 +59,11 @@ function check_for_socket () {
 
 #check_for_socket
 
+function check_for_uptime () {
+local variable=`mysql -h$2 -u$3 -p$4 -P$5 -e "\s;" | grep Uptime: | awk '{ printf $2$3 }'`
+export "$1"=$variable
+}
+
 function slave_status() {
 local variable1=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
 local variable2=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status\G" | grep Slave_SQL_Running: | awk '{ print $2 }'`
@@ -83,10 +88,10 @@ if [ -z $1 -o -z $2 ] ; then
 		SendMessageToDingding "Replication is not configured \nor you do not have the required access to MySQL on server $3!"
 fi
 
-if [ $2 == 'No' ] ; then
+if [ $2 != 'Yes' ] ; then
         #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
         SendMessageToDingding "SQL thread not running on server $3!\nLast Error:${Last_Error}"
-elif [ $1 == 'No' ] ; then
+elif [ $1 != 'Yes' ] ; then
         #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
         SendMessageToDingding "IO thread not running on server $3!\nLast Error:${Last_Error}"
 elif [ $1 == 'No' ] && [ $2 == 'No' ] ; then
@@ -138,6 +143,12 @@ fi
 grep -v "^$" /etc/hosts|grep -v "^#"|grep slave|awk '{print $1,$2}'| while read ip hostname
 
 do
+
+check_for_uptime server_uptime ${ip} repl ${monitor_passwd} {{ mysql_port }}
+
+if [ -z ${server_uptime} ] ; then
+        SendMessageToDingding "mysql is not running on server ${hostname} in env_{{ business_env }}"
+else
 
 slave_status Slave_IO Slave_SQL Last_Error ${ip} repl ${monitor_passwd} {{ mysql_port }}
 
