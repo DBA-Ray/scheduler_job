@@ -152,4 +152,6 @@ performance_status count_transactions_in_queue ${ip} repl ${monitor_passwd} {{ m
 
 performance_status_alert ${count_transactions_in_queue} Alert_${hostname}_{{ business_env }}
 
+fi
+
 done
