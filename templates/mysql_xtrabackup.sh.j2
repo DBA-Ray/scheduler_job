@@ -22,7 +22,7 @@ bakuser=pmm
 
 bakpass=${2}
 
-baklog="$backupdir/log"
+logdir="$backupdir/log/xtrabackup_log"
 
 host="localhost"
 
@@ -45,6 +45,8 @@ chkpointdir="$backupdir/chkpoint"
 clean() {
 
 find ${remotedir}/ -name "${hostname}_${delete_time}*" -exec rm -rf {} \;
+
+find ${logdir}/ -name "${hostname}_${delete_time}*" -exec rm -rf {} \;
 
 }
 
