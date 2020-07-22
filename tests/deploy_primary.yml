@@ -1,6 +1,5 @@
 ---
-- hosts: slave_monitor2
-  remote_user: root
+- hosts: "{{ primary_hostname }}"
   vars:
     initial_mysql_defragment: False
     initial_mysql_archive: False
