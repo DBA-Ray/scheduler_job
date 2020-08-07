@@ -6,7 +6,7 @@ if [ $# -ne 2 ]
 
 then
 
-    echo "usage: `basename $0` [full|incr|clean and root_password]"
+    echo "usage: `basename $0` [full|incr|clean and pmm_password]"
 
     exit 1
 
@@ -78,13 +78,13 @@ cp ${conf_file} ${remotedir}/${hostname}_${time}_full/
 
 ##压缩备份
 
-cd ${remotedir}/
+zstd -T0 -v --rm -r ${remotedir}/${hostname}_${time}_full
 
-tar -zcvf ./${hostname}_${time}_full.tgz ./${hostname}_${time}_full
+##打包备份并删除原始备份
 
-##删除原始备份
+cd ${remotedir}
 
-rm -rf ${remotedir}/${hostname}_${time}_full
+tar -cvf ./${hostname}_${time}_full.tar ./${hostname}_${time}_full --remove-files
 
 }
 
@@ -105,19 +105,15 @@ ${xtrabackup} --defaults-file=${conf_file} --user=${bakuser} --password=${bakpas
 --datadir=${datadir} --socket=${socket} --no-lock --extra-lsndir=${chkpointdir} --parallel=16 --backup --incremental-lsn=${lsn} \
 --target-dir=${remotedir}/${hostname}_${time}_incr/
 
-##备份配置文件
-
-cp -f ${conf_file} ${remotedir}/${hostname}_${time}_incr/
-
 ##压缩备份
 
-cd ${remotedir}/
+zstd -T0 -v --rm -r ${remotedir}/${hostname}_${time}_incr
 
-tar -zcvf ./${hostname}_${time}_incr.tgz ./${hostname}_${time}_incr
+##打包备份并删除原始备份
 
-##删除原始备份
+cd ${remotedir}
 
-rm -rf ${remotedir}/${hostname}_${time}_incr
+tar -cvf ./${hostname}_${time}_incr.tar ./${hostname}_${time}_incr --remove-files
 
 }
 
