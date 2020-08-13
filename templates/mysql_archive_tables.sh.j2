@@ -14,9 +14,9 @@ source /etc/profile
 
 log_date=`date +"%Y%m%d"`
 
-drop_date=`date +"%Y%m%d" -d "-5 days"` #Keep data for a few days
+drop_date=`date +"%Y%m%d" -d "-5 days"` #Keep data for a few days,include the current day
 
-arc_suffix=${log_date}
+arc_suffix=`date +"%Y%m%d" -d "-1 days"` #Archive yesterday'data
 
 declare -A dic
 
