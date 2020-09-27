@@ -154,11 +154,11 @@ slave_status Slave_IO Slave_SQL Last_Error ${ip} repl ${monitor_passwd} {{ mysql
 
 slave_status_alert ${Slave_IO} ${Slave_SQL} Alert_${hostname}_{{ business_env }}
 
-slave_delay_status seconds ${ip} repl ${monitor_passwd} {{ mysql_port }}
+slave_delay_status original_seconds ${ip} repl ${monitor_passwd} {{ mysql_port }}
 
-human_readable_time ${seconds} seconds_readable
+human_readable_time ${original_seconds} seconds_readable
 
-slave_delay_status_alert ${seconds} ${seconds_readable} Alert_${hostname}_{{ business_env }}
+slave_delay_status_alert ${original_seconds} ${seconds_readable} Alert_${hostname}_{{ business_env }}
 
 fi
 
