@@ -40,5 +40,5 @@ archive_dic: >
               [dxz_user_resource_access_copy1]=\"created_at < '2019-6-30 00:00:00'\""
 source_info: "localhost 3377 dxz"
 dest_info: "localhost 3377 dxz"
-arc_suffix: `date +"%Y%m%d" -d "-1 days"` #Archive data for several days
-drop_date: `date +"%Y%m%d" -d "-5 days"` #Keep data for a few days,include the current day
+arc_suffix: '`date +"%Y%m%d" -d "-1 days"`' #Archive data for several days
+drop_date: '`date +"%Y%m%d" -d "-5 days"`' #Keep data for a few days,include the current day
