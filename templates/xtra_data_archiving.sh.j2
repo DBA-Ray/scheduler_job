@@ -1,7 +1,7 @@
-#/bin/bash
-#author DBA RL
+# !/bin/bash
+# author DBA RL
 
-#Define basic constants
+# Define basic constants
 
 time_start=`date +%s`
 
@@ -9,11 +9,15 @@ log_date=`date +"%Y-%m-%d_%H-%M-%S"`
 
 c=1
 
-#The full backup must be placed first
+# The full backup must be placed first
 
 restore_array=({{ restore_array }})
 
+{% raw %}
+
 array_length=${#restore_array[*]}
+
+{% endraw %}
 
 if [ ${array_length} -gt 1 ]
 
@@ -57,7 +61,7 @@ function check_status()
 
     then
 
-        ##success backup status
+        # success backup status
 
         echo "Prepare to restore successfulled" >> /tmp/xtra_data_archiving_${log_date}.log
 
@@ -67,7 +71,7 @@ function check_status()
         
         scp -P ${ssh_port} ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}.tar ${restore_host}:${restore_dir}
 
-        #Edit and send xtrabackup_restore.sh
+        # Edit and send xtrabackup_restore.sh
 
         echo "#!/bin/bash" > /tmp/xtrabackup_restore.sh
 
@@ -89,7 +93,7 @@ function check_status()
 
     else
 
-        ##fail backup status
+        # fail backup status
 
         echo "Prepare to restore failed" >> /tmp/xtra_data_archiving_${log_date}.log
   
@@ -97,7 +101,7 @@ function check_status()
 
 }
 
-#Copy and uncompress the backup files to be restored
+# Copy and uncompress the backup files to be restored
 
 for i in ${restore_array[*]}
 
@@ -109,11 +113,11 @@ zstd -T0 -d --rm -r -f -v ${xtrabackup_archive_dir}/${i}/*
 
 done
 
-#Prepare logs for full backup
+# Prepare logs for full backup
 
 xtrabackup --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
 
-#Prepare logs for incr backup
+# Prepare logs for incr backup
 
 if [ ${array_length} -gt 1 ]
 
@@ -135,7 +139,7 @@ echo "Only restore the full backup!"
 
 fi
 
-#Prepare for full backup
+# Prepare for full backup
 
 xtrabackup --prepare --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} >> /tmp/xtra_data_archiving_${log_date}.log 2>&1
 
