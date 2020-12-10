@@ -14,9 +14,9 @@ source /etc/profile
 
 log_date=`date +"%Y%m%d"`
 
-drop_date=`date +"%Y%m%d" -d "-5 days"` #Keep data for a few days,include the current day
+drop_date={{ drop_date }} #Keep data for a few days,include the current day
 
-arc_suffix=`date +"%Y%m%d" -d "-1 days"` #Archive yesterday'data
+arc_suffix={{ arc_suffix }} #Archive data for several days
 
 declare -A dic
 
@@ -40,14 +40,14 @@ source_table="h=${source_info[0]},P=${source_info[1]},u=root,p=${1},D=${source_i
 
 dest_table="h=${dest_info[0]},P=${dest_info[1]},u=root,p=${1},D=${dest_info[2]},t=${key}_${arc_suffix},A=utf8mb4"
 
-mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "create table if not exists ${dest_info[2]}.${key}_${arc_suffix} like ${source_info[2]}.${key};"
+mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "create table if not exists \`${dest_info[2]}\`.\`${key}_${arc_suffix}\` like \`${source_info[2]}\`.\`${key}\`;"
 
 pt-archiver --source ${source_table} --dest ${dest_table} --socket=${socket} --where="${dic[$key]}" --txn-size=100000 --limit=100000 --progress=100000 \
 --statistics --ignore --quick-delete --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
 
 done
 
-mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "drop table if exists ${dest_info[2]}.${key}_${drop_date};"
+mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "drop table if exists \`${dest_info[2]}\`.\`${key}_${drop_date}\`;"
 
 time_end=`date +%s`
 
