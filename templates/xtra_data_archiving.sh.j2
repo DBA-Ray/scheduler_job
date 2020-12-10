@@ -79,7 +79,7 @@ function check_status()
 
         echo "tar -xvf ${restore_dir}/${xtrabackup_full_file_name}.tar -C ${restore_dir}/" >> /tmp/xtrabackup_restore.sh
 
-        echo "cp -rf ${restore_dir}/${xtrabackup_full_file_name}/* ${mysql_data_dir}/"
+        echo "cp -rf ${restore_dir}/${xtrabackup_full_file_name}/* ${mysql_data_dir}/" >> /tmp/xtrabackup_restore.sh
 
         echo "chown -R mysql:mysql ${mysql_data_dir}" >> /tmp/xtrabackup_restore.sh
 
