@@ -14,9 +14,7 @@ c=1
 restore_array=({{ restore_array }})
 
 {% raw %}
-
 array_length=${#restore_array[*]}
-
 {% endraw %}
 
 if [ ${array_length} -gt 1 ]
