@@ -12,7 +12,7 @@ monitordir: "{{ install_dir }}/monitor"
 ssh_port: 22
 restore_host: mgr3
 restore_array: "mgr2_20201209_170001_full mgr2_20201209_173001_incr"
-backupdir: "{{ install_dir }}/backup"
+backupdir: "/mysqlbackup"
 datadir: "{{ basedir }}/data"
 etcdir: "{{ basedir }}/etc"
 logdir: "{{ basedir }}/log"
