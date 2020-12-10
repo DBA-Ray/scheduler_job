@@ -50,6 +50,9 @@
 - include: execute_mysql_xtrabackup_job.yml
   when: execute_mysql_xtrabackup_job | default(False)
 
+- include: execute_mysql_xtra_restore_job.yml
+  when: execute_mysql_xtra_restore_job | default(False)
+
 - include: execute_mysql_dump_job.yml
   when: execute_mysql_dump_job | default(False)
 
