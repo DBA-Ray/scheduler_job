@@ -42,8 +42,8 @@ dest_table="h=${dest_info[0]},P=${dest_info[1]},u=root,p=${1},D=${dest_info[2]},
 
 mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "create table if not exists ${dest_info[2]}.${key}_${arc_suffix} like ${source_info[2]}.${key};"
 
-pt-archiver --source ${source_table} --dest ${dest_table} --socket=${socket} --where="${dic[$key]}" --txn-size=10000 --limit=10000 --progress=10000 \
---statistics --ignore --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
+pt-archiver --source ${source_table} --dest ${dest_table} --socket=${socket} --where="${dic[$key]}" --txn-size=100000 --limit=100000 --progress=100000 \
+--statistics --ignore --quick-delete --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
 
 done
 

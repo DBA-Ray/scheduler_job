@@ -9,7 +9,9 @@ basedir: "{{ install_dir }}/mysql"
 shelldir: "{{ install_dir }}/shell"
 monitordir: "{{ install_dir }}/monitor"
 # Xtrabackup info
-xtrabackup_full: "{{ ansible_hostname }}_xxx_full"
+ssh_port: 22
+restore_host: mgr3
+restore_array: "mgr2_20201209_170001_full mgr2_20201209_173001_incr"
 backupdir: "{{ install_dir }}/backup"
 datadir: "{{ basedir }}/data"
 etcdir: "{{ basedir }}/etc"

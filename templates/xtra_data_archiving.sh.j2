@@ -1,28 +1,148 @@
 #/bin/bash
 #author DBA RL
 
-xtrabackup_full_dir={{ backupdir }}/shell/databak/{{ ansible_hostname }}/{{ xtrabackup_full }}
+#Define basic constants
 
-xtrabackup_full_file=${xtrabackup_full_dir}.tar
+time_start=`date +%s`
 
-xtrabackup_incr_base_dir={{ backupdir }}/archive
+log_date=`date +"%Y-%m-%d_%H-%M-%S"`
 
-tar -xvf $xtrabackup_full_file
+c=1
 
-zstd -T0 -v -d --rm -r $xtrabackup_full_file
+#The full backup must be placed first
 
-xtrabackup --prepare --apply-log-only --target-dir=$xtrabackup_full_dir
+restore_array=({{ restore_array }})
 
-for i in $(ls $xtrabackup_incr_base_dir/*.zst);do zstd -T0 -v --rm -d $i;done
+array_length=${#restore_array[*]}
 
-#for i in $(ls $xtrabackup_incr_base_dir/*.tgz);do tar zxvf $i;done
+if [ ${array_length} -gt 1 ]
 
-for i in $(ls -d $xtrabackup_incr_base_dir/*_incr)
+then
 
-do
+echo "There is not only full backup!" >> /tmp/xtra_data_archiving_${log_date}.log
 
-xtrabackup --prepare --apply-log-only --target-dir=$xtrabackup_full_dir --incremental-dir=$i
+incr_length=`expr ${array_length} - ${c}`
+
+restore_incr_array=${restore_array[*]:1:${incr_length}}
+
+else
+
+echo "There is only full backup!" >> /tmp/xtra_data_archiving_${log_date}.log
+
+fi
+
+xtrabackup_dir={{ backupdir }}/databak/mgr2
+
+xtrabackup_full_file_name=${restore_array[0]}
+
+xtrabackup_archive_dir={{ backupdir }}/archive
+
+mysql_data_dir={{ basedir }}/data
+
+mysql_log_file={{ basedir }}/log/mysqld.log
+
+ssh_port={{ ssh_port }}
+
+restore_host={{ restore_host }}
+
+restore_dir={{ install_dir }}
+
+function check_status()
+
+{
+
+    status=`cat ${1}|grep "completed OK"|wc -l`
+
+    if [ $status -eq 1 ]
+
+    then
+
+        ##success backup status
+
+        echo "Prepare to restore successfulled" >> /tmp/xtra_data_archiving_${log_date}.log
+
+        cd ${xtrabackup_archive_dir}
+        
+        tar -cf ./${xtrabackup_full_file_name}.tar ./${xtrabackup_full_file_name}/*
+        
+        scp -P ${ssh_port} ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}.tar ${restore_host}:${restore_dir}
+
+        #Edit and send xtrabackup_restore.sh
+
+        echo "#!/bin/bash" > /tmp/xtrabackup_restore.sh
+
+        echo "systemctl stop mysqld" >> /tmp/xtrabackup_restore.sh
+
+        echo "rm -rf ${mysql_data_dir}/*" >> /tmp/xtrabackup_restore.sh
+
+        echo "tar -xvf ${restore_dir}/${xtrabackup_full_file_name}.tar -C ${mysql_data_dir}/" >> /tmp/xtrabackup_restore.sh
+
+        echo "chown -R mysql:mysql ${mysql_data_dir}" >> /tmp/xtrabackup_restore.sh
+
+        echo "systemctl start mysqld" >> /tmp/xtrabackup_restore.sh
+
+        echo "tailf -30 ${mysql_log_file}" >> /tmp/xtrabackup_restore.sh
+
+        chmod +x /tmp/xtrabackup_restore.sh
+
+        scp -P ${ssh_port} /tmp/xtrabackup_restore.sh ${restore_host}:${restore_dir}
+
+    else
+
+        ##fail backup status
+
+        echo "Prepare to restore failed" >> /tmp/xtra_data_archiving_${log_date}.log
+  
+    fi
+
+}
+
+#Copy and uncompress the backup files to be restored
+
+for i in ${restore_array[*]}
+
+do 
+
+tar -xf ${xtrabackup_dir}/${i}.tar -C ${xtrabackup_archive_dir}
+
+zstd -T0 -d --rm -r -f -v ${xtrabackup_archive_dir}/${i}/*
 
 done
 
-xtrabackup --prepare --target-dir=$xtrabackup_full_dir
+#Prepare logs for full backup
+
+xtrabackup --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
+
+#Prepare logs for incr backup
+
+if [ ${array_length} -gt 1 ]
+
+then
+
+echo "Not only restore the full backup!"
+
+for i in ${restore_incr_array[*]}
+
+do 
+
+xtrabackup --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} --incremental-dir=${xtrabackup_archive_dir}/${i}
+
+done
+
+else
+
+echo "Only restore the full backup!"
+
+fi
+
+#Prepare for full backup
+
+xtrabackup --prepare --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} >> /tmp/xtra_data_archiving_${log_date}.log 2>&1
+
+check_status /tmp/xtra_data_archiving_${log_date}.log
+
+time_end=`date +%s`
+
+times=$((${time_end}-${time_start}))
+
+echo "Finsh prepare backup at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to prepare." >> /tmp/xtra_data_archiving_${log_date}.log
