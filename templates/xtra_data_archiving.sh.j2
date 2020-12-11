@@ -3,6 +3,16 @@
 
 # Define basic constants
 
+if [ $# -ne 1 ]
+
+then
+
+    echo "usage: `basename $0` [The backup file name to be restored,space separated and single quotes.]"
+
+    exit 1
+
+fi
+
 time_start=`date +%s`
 
 log_date=`date +"%Y-%m-%d_%H-%M-%S"`
@@ -11,7 +21,7 @@ c=1
 
 # The full backup must be placed first
 
-restore_array=({{ restore_array }})
+restore_array=(${1})
 
 {% raw %}
 array_length=${#restore_array[*]}
