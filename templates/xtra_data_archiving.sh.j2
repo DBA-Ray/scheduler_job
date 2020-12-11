@@ -63,11 +63,11 @@ function check_status()
 
         echo "Prepare to restore successfulled" >> /tmp/xtra_data_archiving_${log_date}.log
 
-        cd ${xtrabackup_archive_dir}
+        cd ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
         
-        tar -cf ./${xtrabackup_full_file_name}.tar ./${xtrabackup_full_file_name}/*
+        tar -cf ./${xtrabackup_full_file_name}.tar ./*
         
-        scp -P ${ssh_port} ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}.tar ${restore_host}:${restore_dir}
+        scp -P ${ssh_port} ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}/${xtrabackup_full_file_name}.tar ${restore_host}:${restore_dir}
 
         # Edit and send xtrabackup_restore.sh
 
@@ -78,8 +78,6 @@ function check_status()
         echo "rm -rf ${mysql_data_dir}/*" >> /tmp/xtrabackup_restore.sh
 
         echo "tar -xvf ${restore_dir}/${xtrabackup_full_file_name}.tar -C ${restore_dir}/" >> /tmp/xtrabackup_restore.sh
-
-        echo "cp -rf ${restore_dir}/${xtrabackup_full_file_name}/* ${mysql_data_dir}/" >> /tmp/xtrabackup_restore.sh
 
         echo "chown -R mysql:mysql ${mysql_data_dir}" >> /tmp/xtrabackup_restore.sh
 
