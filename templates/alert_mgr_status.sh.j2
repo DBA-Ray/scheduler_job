@@ -16,10 +16,12 @@ source /etc/profile
 
 monitor_passwd=${1}
 
+dingding_url={{ dingding_url }}
+
 #向钉钉发送消息方法
 function SendMessageToDingding()
 { # 发送钉钉消息
-Dingding_Url="https://oapi.dingtalk.com/robot/send?access_token=134b660cd50a6410cb77d4b75ccbf65e4cd387ffcfc8347a9161910a751d3330" 
+Dingding_Url="${dingding_url}" 
 curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
  { \"msgtype\":\"text\",
 \"text\":{

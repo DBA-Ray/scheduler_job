@@ -16,10 +16,14 @@ source /etc/profile
 
 monitor_passwd=${1}
 
+channel_array=({{ channel_array }})
+
+dingding_url={{ dingding_url }}
+
 #向钉钉发送消息方法
 function SendMessageToDingding()
 { # 发送钉钉消息
-Dingding_Url="https://oapi.dingtalk.com/robot/send?access_token=134b660cd50a6410cb77d4b75ccbf65e4cd387ffcfc8347a9161910a751d3330" 
+Dingding_Url="${dingding_url}" 
 curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
  { \"msgtype\":\"text\",
 \"text\":{
@@ -65,9 +69,9 @@ export "$1"=$variable
 }
 
 function slave_status() {
-local variable1=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
-local variable2=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status\G" | grep Slave_SQL_Running: | awk '{ print $2 }'`
-local variable3=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status\G" | grep Last_Error: | awk '{ print $2 }'`
+local variable1=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status for channel '${8}'\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
+local variable2=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status for channel '${8}'\G" | grep Slave_SQL_Running: | awk '{ print $2 }'`
+local variable3=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status for channel '${8}'\G" | grep Last_Error: | awk '{ print $2 }'`
 export "$1"=$variable1
 export "$2"=$variable2
 export "$3"=$variable3
@@ -123,7 +127,7 @@ function human_readable_time () {
 }
 
 function slave_delay_status () {
-local variable=`mysql -h$2 -u$3 -p$4 -P$5 -e "show slave status\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
+local variable=`mysql -h$2 -u$3 -p$4 -P$5 -e "show slave status for channel '${6}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
 export "$1"=$variable
 }
 
@@ -140,7 +144,7 @@ if [ "$1" -gt 3 ];then
 fi
 }
 
-grep -v "^$" /etc/hosts|grep -v "^#"|grep slave|awk '{print $1,$2}'| while read ip hostname
+grep -v "^$" /etc/hosts|grep -v "^#"|grep {{ monitor_host_group_key }}|awk '{print $1,$2}'| while read ip hostname
 
 do
 
@@ -150,15 +154,21 @@ if [ -z ${server_uptime} ] ; then
         SendMessageToDingding "mysql is not running on server ${hostname} in env_{{ business_env }}"
 else
 
-slave_status Slave_IO Slave_SQL Last_Error ${ip} repl ${monitor_passwd} {{ mysql_port }}
+for i in ${channel_array[*]}
 
-slave_status_alert ${Slave_IO} ${Slave_SQL} Alert_${hostname}_{{ business_env }}
+do 
 
-slave_delay_status original_seconds ${ip} repl ${monitor_passwd} {{ mysql_port }}
+slave_status Slave_IO Slave_SQL Last_Error ${ip} repl ${monitor_passwd} {{ mysql_port }} ${i}
+
+slave_status_alert ${Slave_IO} ${Slave_SQL} Alert_${hostname}_${i}_{{ business_env }}
+
+slave_delay_status original_seconds ${ip} repl ${monitor_passwd} {{ mysql_port }} ${i}
 
 human_readable_time ${original_seconds} seconds_readable
 
-slave_delay_status_alert ${original_seconds} ${seconds_readable} Alert_${hostname}_{{ business_env }}
+slave_delay_status_alert ${original_seconds} ${seconds_readable} Alert_${hostname}_${i}_{{ business_env }}
+
+done
 
 fi
 
