@@ -1,8 +1,8 @@
 ---
 # environment variable
-business_env: shanghai_pro
+business_env: pro
 # primary hostname for mgr
-primary_hostname: mgr1:mgr4
+primary_hostname: mgr1
 # defaults file for scheduler_job
 install_dir: /var/local
 basedir: "{{ install_dir }}/mysql"
