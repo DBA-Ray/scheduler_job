@@ -89,18 +89,16 @@ fi
 
 if [ -z $1 -o -z $2 ] ; then
         #echo "Replication is not configured or you do not have the required access to MySQL on server $3!"|mail -v -s "$3" rulei@jjl.cn
-		SendMessageToDingding "Replication is not configured \nor you do not have the required access to MySQL on server $3!"
-fi
-
-if [ $2 != 'Yes' ] ; then
+        SendMessageToDingding "Replication is not configured \nor the replica channel '${i}' does not exist\nor you do not have the required access to MySQL on server ${hostname}_{{ business_env }}!"
+elif [ $2 != 'Yes' ] ; then
         #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "SQL thread not running on server $3!\nLast Error:${Last_Error}"
+        SendMessageToDingding "SQL thread not running for the the replica channel '${i}' on server ${hostname}_{{ business_env }}!\nLast Error:${Last_Error}"
 elif [ $1 != 'Yes' ] ; then
         #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "IO thread not running on server $3!\nLast Error:${Last_Error}"
+        SendMessageToDingding "IO thread not running for the the replica channel '${i}' on server ${hostname}_{{ business_env }}!\nLast Error:${Last_Error}"
 elif [ $1 == 'No' ] && [ $2 == 'No' ] ; then
         #echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "Replication slave is inactive on server $3!\nLast Error:${Last_Error}"
+        SendMessageToDingding "Replication slave is inactive for the the replica channel '${i}' on server ${hostname}_{{ business_env }}!\nLast Error:${Last_Error}"
 fi
 }
 
@@ -135,12 +133,11 @@ function slave_delay_status_alert () {
 
 if [ "$1" = 'NULL' ] || [ "$1" = '' ] ; then
        #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
-	SendMessageToDingding "Unknown Offset - perhaps slave is stopped or not configured on server $3"
-fi
+	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${i}' on server ${hostname}_{{ business_env }}"
 
-if [ "$1" -gt 3 ];then
+elif [ "$1" -gt 3 ];then
        #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
-        SendMessageToDingding "The data replication latency is "$2"!\nso keep an eye on server $3"
+        SendMessageToDingding "The data replication latency is "$2"!\nso keep an eye for the the replica channel '${i}' on server ${hostname}_{{ business_env }}"
 fi
 }
 
@@ -160,13 +157,13 @@ do
 
 slave_status Slave_IO Slave_SQL Last_Error ${ip} repl ${monitor_passwd} {{ mysql_port }} ${i}
 
-slave_status_alert ${Slave_IO} ${Slave_SQL} Alert_${hostname}_${i}_{{ business_env }}
+slave_status_alert ${Slave_IO} ${Slave_SQL}
 
 slave_delay_status original_seconds ${ip} repl ${monitor_passwd} {{ mysql_port }} ${i}
 
 human_readable_time ${original_seconds} seconds_readable
 
-slave_delay_status_alert ${original_seconds} ${seconds_readable} Alert_${hostname}_${i}_{{ business_env }}
+slave_delay_status_alert ${original_seconds} ${seconds_readable}
 
 done
 
