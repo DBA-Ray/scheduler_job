@@ -51,7 +51,7 @@ function check_for_socket () {
         if [ -S "$socket" ] ; then
                 echo UP > /dev/null
         else
-		        tmp_localip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|grep -v 172.17|grep -v 172.18|awk '{print $2}'|tr -d "addr:"`
+		tmp_localip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|grep -v 172.17|grep -v 172.18|awk '{print $2}'|tr -d "addr:"`
                 localip=`echo $tmp_localip|awk '{print $1}'|sed -n '1p'`
                 echo "No valid socket file "$socket" found!"
                 #echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
