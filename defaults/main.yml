@@ -40,9 +40,12 @@ send_host: 172.21.0.38
 recipient: rulei@jjl.cn
 # Archive tables info
 archive_dic: >
-             "[dxz_user_resource_access]=\"created_at < '2019-7-5 00:00:00'\"
-              [dxz_user_resource_access_copy1]=\"created_at < '2019-6-30 00:00:00'\""
-source_info: "localhost 3377 dxz"
-dest_info: "localhost 3377 dxz"
-arc_suffix: '`date +"%Y%m%d" -d "-1 days"`' #Archive data for several days
+             "[msg-center.mysql.rds.aliyuncs.com]=\"3306,msg-center,t_inside_notice_v2,third_type in ('couponGet','bountyGet','bountyGrab') AND create_date < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\"
+              [rm-2ze50s793579th5w4.mysql.rds.aliyuncs.com]=\"3306,xxl-job,xxl_job_log,trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\"
+              [rm-2zef083ksgam56ysv.mysql.rds.aliyuncs.com]=\"3306,xxl-job,xxl_job_log,trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\"
+              [rm-2zeefmb98v6f5qeuf.mysql.rds.aliyuncs.com]=\"3306,xxl-job,xxl_job_log,trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\"
+              [rm-2zeefmb98v6f5qeuf.mysql.rds.aliyuncs.com]=\"3306,xxl-job-testb,xxl_job_log,trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\"
+              [rm-2zeefmb98v6f5qeuf.mysql.rds.aliyuncs.com]=\"3306,xxl-job-testc,xxl_job_log,trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\"
+              [rm-2ze0u3m4v2465z6rh.mysql.rds.aliyuncs.com]=\"3306,xxl-job,xxl_job_log,trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')\""
+arc_suffix: '`date +"%Y%m%d"`' #Archive data
 drop_date: '`date +"%Y%m%d" -d "-5 days"`' #Keep data for a few days,include the current day

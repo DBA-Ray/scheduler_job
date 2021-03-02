@@ -10,7 +10,7 @@ then
 
 fi
 
-source /etc/profile
+#source /etc/profile
 
 log_date=`date +"%Y%m%d"`
 
@@ -18,36 +18,47 @@ drop_date={{ drop_date }} #Keep data for a few days,include the current day
 
 arc_suffix={{ arc_suffix }} #Archive data for several days
 
-declare -A dic
+declare -A dic=({{ archive_dic }})
 
-eval dic=({{ archive_dic }})
+DIC_KEY=$(echo ${!dic[@]})
 
-source_info=({{ source_info }})
+DIC_ARRAY=(
+$DIC_KEY
+)
 
-dest_info=({{ dest_info }})
+ARRAY_NUM=${#DIC_ARRAY[*]}
 
-socket={{ socket }}
+UPDATE_PROJECT_ARRAY_NUM=`expr ${#DIC_ARRAY[@]} - 1`
 
 time_start=`date +%s`
 
 echo "Start archiving at `date +"%Y-%m-%d %H:%M:%S"`." > /tmp/archive_table_${log_date}.log
 
-for key in $(echo ${!dic[*]})
-
+for i in `seq 0 ${UPDATE_PROJECT_ARRAY_NUM}`
+  
 do
 
-source_table="h=${source_info[0]},P=${source_info[1]},u=root,p=${1},D=${source_info[2]},t=${key},A=utf8mb4"
+hostname=`echo ${DIC_ARRAY[${i}]}`
 
-dest_table="h=${dest_info[0]},P=${dest_info[1]},u=root,p=${1},D=${dest_info[2]},t=${key}_${arc_suffix},A=utf8mb4"
+port=`echo ${dic["$hostname"]}|awk -F[,] '{print $1}'`
 
-mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "create table if not exists \`${dest_info[2]}\`.\`${key}_${arc_suffix}\` like \`${source_info[2]}\`.\`${key}\`;"
+db=`echo ${dic["$hostname"]}|awk -F[,] '{print $2}'`
 
-pt-archiver --source ${source_table} --dest ${dest_table} --socket=${socket} --where="${dic[$key]}" --txn-size=10000 --limit=10000 --progress=10000 \
+table=`echo ${dic["$hostname"]}|awk -F[,] '{print $3}'`
+
+where=`echo ${dic["$hostname"]}|awk -F[,] '{print $4}'`
+
+mysql -h${hostname} -uroot -p${1} -P${port} -e "create table if not exists \`${db}\`.\`${table}_${arc_suffix}\` like \`${db}\`.\`${table}\`;"
+
+pt-archiver --source h=${hostname},P=${port},u=root,p=${1},D=${db},t=${table},A=utf8mb4 --dest h=${hostname},P=${port},u=root,p=${1},D=${db},t=${table}_${arc_suffix},A=utf8mb4 \
+--where="${where}" --txn-size=10000 --limit=10000 --progress=10000 \
 --statistics --ignore --quick-delete --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
+
+echo $hostname $port $db $table $where
 
 done
 
-mysql -h${dest_info[0]} -uroot -p${1} -P${dest_info[1]} -e "drop table if exists \`${dest_info[2]}\`.\`${key}_${drop_date}\`;"
+mysql -h${hostname} -uroot -p${1} -P${port} -e "drop table if exists \`${db}\`.\`${table}_${drop_date}\`;"
 
 time_end=`date +%s`
 
