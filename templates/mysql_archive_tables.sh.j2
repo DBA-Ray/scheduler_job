@@ -26,9 +26,11 @@ DIC_ARRAY=(
 $DIC_KEY
 )
 
+{% raw %}
 ARRAY_NUM=${#DIC_ARRAY[*]}
 
 UPDATE_PROJECT_ARRAY_NUM=`expr ${#DIC_ARRAY[@]} - 1`
+{% endraw %}
 
 time_start=`date +%s`
 
@@ -40,13 +42,13 @@ do
 
 hostname=`echo ${DIC_ARRAY[${i}]}`
 
-port=`echo ${dic["$hostname"]}|awk -F[,] '{print $1}'`
+port=`echo ${dic["$hostname"]}|awk -F[?] '{print $1}'`
 
-db=`echo ${dic["$hostname"]}|awk -F[,] '{print $2}'`
+db=`echo ${dic["$hostname"]}|awk -F[?] '{print $2}'`
 
-table=`echo ${dic["$hostname"]}|awk -F[,] '{print $3}'`
+table=`echo ${dic["$hostname"]}|awk -F[?] '{print $3}'`
 
-where=`echo ${dic["$hostname"]}|awk -F[,] '{print $4}'`
+where=`echo ${dic["$hostname"]}|awk -F[?] '{print $4}'`
 
 mysql -h${hostname} -uaudit -p${1} -P${port} -e "create table if not exists \`${db}\`.\`${table}_${arc_suffix}\` like \`${db}\`.\`${table}\`;"
 
@@ -54,11 +56,11 @@ pt-archiver --source h=${hostname},P=${port},u=audit,p=${1},D=${db},t=${table},A
 --where="${where}" --txn-size=10000 --limit=10000 --progress=10000 \
 --statistics --ignore --quick-delete --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
 
+mysql -h${hostname} -uaudit -p${1} -P${port} -e "drop table if exists \`${db}\`.\`${table}_${drop_date}\`;"
+
 echo $hostname $port $db $table $where
 
 done
-
-mysql -h${hostname} -uaudit -p${1} -P${port} -e "drop table if exists \`${db}\`.\`${table}_${drop_date}\`;"
 
 time_end=`date +%s`
 
