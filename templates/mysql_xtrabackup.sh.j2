@@ -16,7 +16,7 @@ hostname={{ ansible_hostname }}               # the name for bakcup
 
 backupdir={{ backupdir }}
 
-conf_file={{ basedir }}/etc/my.cnf          # the mysql config file
+conf_file={{ basedir }}/etc/my_{{ local_port }}.cnf          # the mysql config file
 
 bakuser=pmm
 
@@ -26,11 +26,11 @@ logdir="$backupdir/log/xtrabackup_log"
 
 host="127.0.0.1"
 
-port={{ mysql_port }}
+port={{ local_port }}
 
-datadir={{ datadir }}
+datadir={{ datadir }}_{{ local_port }}
 
-socket={{ socket }}
+socket={{ datadir }}_{{ local_port }}/mysql.sock
 
 xtrabackup="xtrabackup"
 

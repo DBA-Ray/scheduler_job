@@ -14,6 +14,8 @@ dingding_url: "oapi.dingtalk.com/robot/send?access_token=f333b3f832ac4e91f7906ac
 monitor_host_group_key: mgr1
 # Xtrabackup info
 ssh_port: 22
+local_port: 7733
+remote_port: 3377
 restore_host: mgr3
 restore_array: "mgr2_20201209_170001_full mgr2_20201209_173001_incr"
 backupdir: "/mysqlbackup"

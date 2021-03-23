@@ -7,7 +7,7 @@ if [ $# -ne 1 ]
 
 then
 
-    echo "usage: `basename $0` [The backup file name to be restored,space separated and single quotes.]"
+    echo "usage: `basename $0` [The backup file name without 'tar' suffix to be restored,space separated and single quotes.]"
 
     exit 1
 
@@ -16,6 +16,8 @@ fi
 time_start=`date +%s`
 
 log_date=`date +"%Y-%m-%d_%H-%M-%S"`
+
+processor=`cat /proc/cpuinfo |grep "processor"|wc -l`
 
 c=1
 
@@ -31,7 +33,7 @@ if [ ${array_length} -gt 1 ]
 
 then
 
-echo "There is not only full backup!" >> /tmp/xtra_data_archiving_${log_date}.log
+echo "There is not only full backup!" > /tmp/xtra_data_archiving_${log_date}.log
 
 incr_length=`expr ${array_length} - ${c}`
 
@@ -39,19 +41,27 @@ restore_incr_array=${restore_array[*]:1:${incr_length}}
 
 else
 
-echo "There is only full backup!" >> /tmp/xtra_data_archiving_${log_date}.log
+echo "There is only full backup!" > /tmp/xtra_data_archiving_${log_date}.log
 
 fi
 
-xtrabackup_dir={{ backupdir }}/databak/mgr2
+xtrabackup_dir={{ backupdir }}/databak/{{ inventory_hostname_short }}
 
 xtrabackup_full_file_name=${restore_array[0]}
 
 xtrabackup_archive_dir={{ backupdir }}/archive
 
-mysql_data_dir={{ basedir }}/data
+mysql_localhost_name=mysqld_{{ local_port }}
 
-mysql_log_file={{ basedir }}/log/mysqld.log
+mysql_remote_name=mysqld_{{ remote_port }}
+
+mysql_data_dir={{ datadir }}_{{ local_port }}
+
+mysql_remote_data_dir={{ datadir }}_{{ remote_port }}
+
+mysql_log_file={{ logdir }}/${mysql_localhost_name}.log
+
+mysql_remote_log_file={{ logdir }}/${mysql_remote_name}.log
 
 ssh_port={{ ssh_port }}
 
@@ -73,31 +83,61 @@ function check_status()
 
         echo "Prepare to restore successfulled" >> /tmp/xtra_data_archiving_${log_date}.log
 
-        cd ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
+        if [ $restore_host == 'localhost' ]
+  
+        then 
+
+        systemctl stop ${mysql_localhost_name}
+
+        rm -rf ${mysql_data_dir}/*
+
+        cp -rf ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}/* ${mysql_data_dir}/
+
+        chown -R mysql:mysql ${mysql_data_dir}
+
+        systemctl start ${mysql_localhost_name}    
         
-        tar -cf ./${xtrabackup_full_file_name}.tar ./*
+        sleep 10
+
+        tail -10 ${mysql_log_file} >> /tmp/xtra_data_archiving_${log_date}.log
+ 
+        else
+
+        #cd ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
         
-        scp -P ${ssh_port} ${xtrabackup_archive_dir}/${xtrabackup_full_file_name}/${xtrabackup_full_file_name}.tar ${restore_host}:${restore_dir}
+        #tar -cf ./${xtrabackup_full_file_name}.tar ./*
+        
+        scp -P ${ssh_port} -r -c chacha20-poly1305@openssh.com ${xtrabackup_archive_dir}/${xtrabackup_full_file_name} ${restore_host}:${restore_dir}
 
         # Edit and send xtrabackup_restore.sh
 
-        echo "#!/bin/bash" > /tmp/xtrabackup_restore.sh
+        #echo "#!/bin/bash" > /tmp/xtrabackup_restore.sh
 
-        echo "systemctl stop mysqld" >> /tmp/xtrabackup_restore.sh
+        #echo "systemctl stop ${mysql_remote_name}" >> /tmp/xtrabackup_restore.sh
 
-        echo "rm -rf ${mysql_data_dir}/*" >> /tmp/xtrabackup_restore.sh
+        #echo "rm -rf ${mysql_data_dir}/*" >> /tmp/xtrabackup_restore.sh
 
-        echo "tar -xvf ${restore_dir}/${xtrabackup_full_file_name}.tar -C ${mysql_data_dir}/" >> /tmp/xtrabackup_restore.sh
+        #echo "tar -xvf ${restore_dir}/${xtrabackup_full_file_name}.tar -C ${mysql_data_dir}/" >> /tmp/xtrabackup_restore.sh
 
-        echo "chown -R mysql:mysql ${mysql_data_dir}" >> /tmp/xtrabackup_restore.sh
+        #echo "chown -R mysql:mysql ${mysql_data_dir}" >> /tmp/xtrabackup_restore.sh
 
-        echo "systemctl start mysqld" >> /tmp/xtrabackup_restore.sh
+        #echo "systemctl start ${mysql_remote_name}" >> /tmp/xtrabackup_restore.sh
 
-        echo "tailf -30 ${mysql_log_file}" >> /tmp/xtrabackup_restore.sh
+        #echo "tail -10 ${mysql_log_file}" >> /tmp/xtrabackup_restore.sh
 
-        chmod +x /tmp/xtrabackup_restore.sh
+        #chmod +x /tmp/xtrabackup_restore.sh
 
-        scp -P ${ssh_port} /tmp/xtrabackup_restore.sh ${restore_host}:${restore_dir}
+        #scp -P ${ssh_port} /tmp/xtrabackup_restore.sh ${restore_host}:${restore_dir}
+       
+        ssh -p ${ssh_port} root@${restore_host} "systemctl stop ${mysql_remote_name};rm -rf ${mysql_remote_data_dir}/*;\
+cp -rf ${restore_host}:${restore_dir}/${xtrabackup_full_file_name}/* ${mysql_remote_data_dir}/;\
+chown -R mysql:mysql ${mysql_remote_data_dir};systemctl start ${mysql_remote_name}"
+
+        sleep 10
+
+        ssh -p ${ssh_port} root@${restore_host} "tail -10 ${mysql_remote_log_file}" >> /tmp/xtra_data_archiving_${log_date}.log
+
+        fi
 
     else
 
@@ -115,6 +155,8 @@ for i in ${restore_array[*]}
 
 do 
 
+rm -rf ${xtrabackup_dir}/${i}
+
 tar -xf ${xtrabackup_dir}/${i}.tar -C ${xtrabackup_archive_dir}
 
 zstd -T0 -d --rm -r -f -v ${xtrabackup_archive_dir}/${i}/*
@@ -123,7 +165,7 @@ done
 
 # Prepare logs for full backup
 
-xtrabackup --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
+xtrabackup --parallel=${processor} --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name}
 
 # Prepare logs for incr backup
 
@@ -137,7 +179,7 @@ for i in ${restore_incr_array[*]}
 
 do 
 
-xtrabackup --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} --incremental-dir=${xtrabackup_archive_dir}/${i}
+xtrabackup --parallel=${processor} --prepare --apply-log-only --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} --incremental-dir=${xtrabackup_archive_dir}/${i}
 
 done
 
@@ -147,9 +189,11 @@ echo "Only restore the full backup!"
 
 fi
 
-# Prepare for full backup
+# Prepare for all backup
 
-xtrabackup --prepare --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} >> /tmp/xtra_data_archiving_${log_date}.log 2>&1
+xtrabackup --parallel=${processor} --prepare --use-memory=2G --target-dir=${xtrabackup_archive_dir}/${xtrabackup_full_file_name} >> /tmp/xtra_data_archiving_${log_date}.log 2>&1
+
+# Check whehter to apply logs successfully and whether to copy files for starting mysql.
 
 check_status /tmp/xtra_data_archiving_${log_date}.log
 
@@ -157,4 +201,4 @@ time_end=`date +%s`
 
 times=$((${time_end}-${time_start}))
 
-echo "Finsh prepare backup at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to prepare." >> /tmp/xtra_data_archiving_${log_date}.log
+echo "Finsh at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to recover data." >> /tmp/xtra_data_archiving_${log_date}.log
