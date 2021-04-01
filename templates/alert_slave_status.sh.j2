@@ -2,19 +2,9 @@
 
 #Author DBA R
 
-if [ $# -ne 1 ]
+#source /etc/profile
 
-then
-
-    echo "usage: `basename $0` [repl_password]"
-
-    exit 1
-
-fi
-
-source /etc/profile
-
-monitor_passwd=${1}
+user=repl
 
 channel_array=({{ channel_array }})
 
@@ -33,73 +23,36 @@ curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
 \"isAtAll\":false} }"
 }
 
-## Find the location of the mysql.sock file ##
-
-function check_for_socket () {
-        if [ -z $socket ] ; then
-                if [ -S /var/lib/mysql/mysql.sock ] ; then
-                        socket=/var/lib/mysql/mysql.sock
-                elif [ -S /tmp/mysql.sock ] ; then
-                        socket=/tmp/mysql.sock
-                else
-                        ps_socket=`netstat -ln | egrep "mysql(d)?\.sock" | awk '{ print $9 }'`
-                        if [ "$ps_socket" ] ; then
-                        socket=$ps_socket
-                        fi
-                fi
-        fi
-        if [ -S "$socket" ] ; then
-                echo UP > /dev/null
-        else
-		tmp_localip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|grep -v 172.17|grep -v 172.18|awk '{print $2}'|tr -d "addr:"`
-                localip=`echo $tmp_localip|awk '{print $1}'|sed -n '1p'`
-                echo "No valid socket file "$socket" found!"
-                #echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
-                SendMessageToDingding "mysqld is not running or it is installed in a custom location on server $localip"
-                echo "Please set the $socket variable at the top of this script."
-                exit 1
-        fi
-}
-
-#check_for_socket
-
 function check_for_uptime () {
-local variable=`mysql -h$2 -u$3 -p$4 -P$5 -e "\s;" | grep Uptime: | awk '{ printf $2$3 }'`
-export "$1"=$variable
+server_uptime=`mysql --login-path=${1}_${user} -e "\s;" | grep Uptime: | awk '{ printf $2$3 }'`
+export server_uptime
 }
 
 function slave_status() {
-local variable1=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status for channel '${8}'\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
-local variable2=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status for channel '${8}'\G" | grep Slave_SQL_Running: | awk '{ print $2 }'`
-local variable3=`mysql -h$4 -u$5 -p$6 -P$7 -e "show slave status for channel '${8}'\G" | grep Last_Error: | awk '{ print $2 }'`
-export "$1"=$variable1
-export "$2"=$variable2
-export "$3"=$variable3
+Slave_IO=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
+Slave_SQL=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Slave_SQL_Running: | awk '{ print $2 }'`
+Last_Error=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Last_Error: | awk '{ print $2 }'`
+export Slave_IO
+export Slave_SQL
+export Last_Error
 }
 
 function slave_status_alert () {
 
-if [ "${Last_Error}" = "" ] ; then
-
-Last_Error="无错误信息"
-
-echo ${Last_Error}
-
-fi
-
-if [ -z $1 -o -z $2 ] ; then
+if [ -z ${4} -o -z ${5} ] ; then
         #echo "Replication is not configured or you do not have the required access to MySQL on server $3!"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "Replication is not configured \nor the replica channel '${i}' does not exist\nor you do not have the required access to MySQL on server ${hostname}_{{ business_env }}!"
-elif [ $2 != 'Yes' ] ; then
+        SendMessageToDingding "Replication is not configured \nor the replica channel '${1}' does not exist\nor you do not have the required access to MySQL on server ${2}_${3}!"
+elif [ ${4} != 'Yes' ] ; then
         #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "SQL thread not running for the the replica channel '${i}' on server ${hostname}_{{ business_env }}!\nLast Error:${Last_Error}"
-elif [ $1 != 'Yes' ] ; then
+        SendMessageToDingding "SQL thread not running for the the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
+elif [ ${5} != 'Yes' ] ; then
         #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "IO thread not running for the the replica channel '${i}' on server ${hostname}_{{ business_env }}!\nLast Error:${Last_Error}"
-elif [ $1 == 'No' ] && [ $2 == 'No' ] ; then
+        SendMessageToDingding "IO thread not running for the the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
+elif [ ${4} == 'No' ] && [ ${5} == 'No' ] ; then
         #echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "Replication slave is inactive for the the replica channel '${i}' on server ${hostname}_{{ business_env }}!\nLast Error:${Last_Error}"
+        SendMessageToDingding "Replication slave is inactive for the the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
 fi
+
 }
 
 function human_readable_time () {
@@ -125,19 +78,30 @@ function human_readable_time () {
 }
 
 function slave_delay_status () {
-local variable=`mysql -h$2 -u$3 -p$4 -P$5 -e "show slave status for channel '${6}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
-export "$1"=$variable
+local variable1=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
+sleep 5
+local variable2=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
+sleep 5
+local variable3=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
+sleep 5
+local variable4=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
+sleep 5
+local variable5=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
+c=25
+local variable_sum=`expr $variable1 + $variable2 + $variable3 + $variable4 + $variable5`
+original_seconds=`expr $variable_sum / $c`
+export original_seconds
 }
 
 function slave_delay_status_alert () {
 
-if [ "$1" = 'NULL' ] || [ "$1" = '' ] ; then
+if [ "${4}" = 'NULL' ] || [ "${4}" = '' ] ; then
        #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
-	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${i}' on server ${hostname}_{{ business_env }}"
+	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${1}' on server ${2}_${3}"
 
-elif [ "$1" -gt 3 ];then
+elif [ "${4}" -gt 7 ];then
        #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
-        SendMessageToDingding "The data replication latency is "$2"!\nso keep an eye for the the replica channel '${i}' on server ${hostname}_{{ business_env }}"
+        SendMessageToDingding "The data replication latency is "${5}"!\nso keep an eye for the the replica channel '${1}' on server ${2}_${3}"
 fi
 }
 
@@ -145,25 +109,25 @@ grep -v "^$" /etc/hosts|grep -v "^#"|grep {{ monitor_host_group_key }}|awk '{pri
 
 do
 
-check_for_uptime server_uptime ${ip} repl ${monitor_passwd} {{ mysql_port }}
+check_for_uptime ${hostname}
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname} in env_{{ business_env }}"
+        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} in env_pro"
 else
 
 for i in ${channel_array[*]}
 
 do 
 
-slave_status Slave_IO Slave_SQL Last_Error ${ip} repl ${monitor_passwd} {{ mysql_port }} ${i}
+slave_status ${hostname} ${i}
 
-slave_status_alert ${Slave_IO} ${Slave_SQL}
+slave_status_alert ${i} ${hostname} ${ip} ${Slave_SQL} ${Slave_IO} "${Last_Error}"
 
-slave_delay_status original_seconds ${ip} repl ${monitor_passwd} {{ mysql_port }} ${i}
+slave_delay_status ${hostname} ${i}
 
 human_readable_time ${original_seconds} seconds_readable
 
-slave_delay_status_alert ${original_seconds} ${seconds_readable}
+slave_delay_status_alert ${i} ${hostname} ${ip} ${original_seconds} ${seconds_readable}
 
 done
 
