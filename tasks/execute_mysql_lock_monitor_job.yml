@@ -1,0 +1,4 @@
+- name: Execute alert_mgr_status.sh and alert_slave_status.sh
+  shell: "{{ item }}"
+  with_items:
+    - "sh -x {{ shelldir }}/alert_lock_monitor.sh"

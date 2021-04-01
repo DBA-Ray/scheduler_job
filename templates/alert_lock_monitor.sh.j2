@@ -1,0 +1,145 @@
+#!/bin/bash
+
+#Author DBA R
+
+#source /etc/profile
+
+cleantime=`date +%H%M%S`
+
+lock_info_dir={{ monitordir }}
+
+lock_info_backup_dir={{ monitordir }}_backup
+
+oss_dir=oss://mptsss/lock_info/
+
+url_dir_base="https://mptsss.oss-cn-beijing.aliyuncs.com/lock_info"
+
+ossutil_dir=/data/ossutil64
+
+dingding_url="https://{{ dingding_url }}"
+
+function MSendMessageToDingding()
+{ # 发送钉钉消息
+Dingding_Url="${dingding_url}" 
+curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
+ { \"msgtype\": \"markdown\",
+     \"markdown\": {
+         \"title\":\"${1}\",
+         \"text\": \"#### 数据库实例${2}：监测到${1} \n> ![screenshot](https://mptsss.oss-cn-beijing.aliyuncs.com/pic_dba/mysql_lock.jpg)\n> #### 请点击[查看](${3}) \n\"
+     },
+\"at\":{ 
+\"atMobiles\":[\"15668661298\"],
+\"isAtAll\":false} }"
+}
+
+function check_file_dir()
+
+{
+
+    if [[ ! -d ${lock_info_dir} || ! -d ${lock_info_backup_dir} ]];then
+
+        mkdir -p ${lock_info_dir} ${lock_info_backup_dir}
+
+        else echo "锁信息文件夹存在"
+
+    fi
+
+}
+
+function clean_backup_file()
+
+{
+
+    delete_time=`date  "+%Y%m%d" -d "-7 days"`
+
+    find ${lock_info_backup_dir}/ -name "*${delete_time}*" -exec rm -rf {} \;
+
+/usr/bin/expect <<-EOF
+set timeout 30
+spawn ${ossutil_dir} rm ${oss_dir} --include "*${delete_time}*" -r
+expect *remove*
+send y\r
+interact
+expect eof
+EOF
+
+}
+
+function check_for_uptime () {
+local variable=`mysql --login-path=${2} -e "\s;" | grep Uptime: | awk '{ printf $2$3 }'`
+export "$1"="$variable"
+}
+
+function check_for_lock_info () {
+
+mv -f ${lock_info_dir}/* ${lock_info_backup_dir}/
+
+mysql --login-path=${1} -e "SELECT esh.sql_text, stlw.sql_kill_blocking_connection, stlw.waiting_query, stlw.waiting_query_secs, concat( stlw.object_schema, '.', stlw.object_name ) AS object_info, stlw.blocking_account, stlw.blocking_lock_type, stlw.blocking_lock_duration FROM \
+sys.schema_table_lock_waits stlw JOIN performance_schema.events_statements_history esh ON esh.thread_id = stlw.blocking_thread_id \
+WHERE esh.sql_text LIKE CONCAT( '%', stlw.object_name, '%' )\G;" > ${lock_info_dir}/${1}_meta_lock_`date "+%Y%m%d_%H%M%S"`.txt
+
+mysql --login-path=${1} -e "SELECT DISTINCT esh.sql_text,trx.trx_started,now(),concat( to_seconds( now())- to_seconds( trx.trx_started ), 's' ) AS trx_last_time,concat( thr.processlist_user, '@', thr.processlist_host ) AS account,concat( meta.OBJECT_SCHEMA, '.', meta.OBJECT_NAME ) AS object_info,trx.trx_tables_locked,trx.trx_rows_locked,trx.trx_rows_modified,\
+CONCAT( 'KILL', ' ', trx.trx_mysql_thread_id ) AS kill_connection,trx.trx_query FROM information_schema.innodb_trx trx JOIN performance_schema.threads thr \
+ON trx.trx_mysql_thread_id = thr.processlist_id JOIN performance_schema.metadata_locks meta ON thr.thread_id = meta.OWNER_THREAD_ID JOIN performance_schema.events_statements_history esh ON thr.thread_id = esh.thread_id \
+WHERE to_seconds(now())- to_seconds( trx.trx_started ) >= 3 AND esh.sql_text LIKE CONCAT('%',meta.OBJECT_NAME,'%')\G;" > ${lock_info_dir}/${1}_trx_uncommited_`date "+%Y%m%d_%H%M%S"`.txt
+
+mysql --login-path=${1} -e "SELECT DISTINCT esh.SQL_TEXT AS "阻塞SQL",ilw.waiting_query AS "等待SQL",CONCAT( thr.processlist_user, '@', thr.processlist_host ) AS 用户, ilw.locked_table AS 对象信息,ilw.blocking_trx_started \
+AS 阻塞开始时间,ilw.wait_age_secs AS 阻塞时间,ilw.locked_index AS 锁索引类型,ilw.blocking_trx_rows_locked AS 阻塞事务锁定行数,ilw.waiting_trx_rows_locked AS 等待事务锁定行数,ilw.blocking_lock_mode AS 阻塞锁模式,ilw.waiting_lock_mode AS 等待锁模式,ilw.sql_kill_blocking_query AS "KILL阻塞会话" \
+FROM sys.innodb_lock_waits ilw JOIN performance_schema.threads thr ON ilw.blocking_pid = thr.processlist_id JOIN performance_schema.events_statements_history esh ON thr.thread_id = esh.thread_id \
+WHERE esh.SQL_TEXT LIKE CONCAT('%',ilw.locked_table,'%')\G;" > ${lock_info_dir}/${1}_lock_wait_`date "+%Y%m%d_%H%M%S"`.txt
+
+}
+
+check_file_dir
+
+grep -v "^$" /etc/hosts|grep -v "^#"|grep -E 'mgr1|dev|test|prod'|awk '{print $1,$2}'| while read ip hostname
+
+do
+
+check_for_uptime server_uptime ${hostname}
+
+if [ -z ${server_uptime} ] ; then
+        SendMessageToDingding "mysql is not running on server ${hostname} in env_pro"
+else
+
+check_for_lock_info ${hostname}
+
+for i in `ls -l ${lock_info_dir}/| grep ^[^d] | awk '{print $9}'`
+
+do
+
+if  [ `cat ${lock_info_dir}/${i} |wc -l` -eq 0 ];then
+    echo "${i} is empty"
+else 
+
+${ossutil_dir} cp ${lock_info_dir}/${i} ${oss_dir}
+
+if [[ ${i} =~ 'meta_lock' ]];then
+
+MSendMessageToDingding 元数据锁 ${hostname} ${url_dir_base}/${i}
+
+elif [[ ${i} =~ 'trx_uncommited' ]];then
+
+MSendMessageToDingding 超3秒未提交事务 ${hostname} ${url_dir_base}/${i}
+
+elif [[ ${i} =~ 'lock_wait' ]];then
+
+MSendMessageToDingding 锁等待 ${hostname} ${url_dir_base}/${i}
+
+else echo "`date "+%Y%m%d_%H%M%S"`无锁相关监控报警信息！"
+
+fi
+
+fi
+
+done 
+
+fi
+
+done
+
+if [[ ${cleantime} -eq 070001 ]];then
+
+clean_backup_file
+
+fi

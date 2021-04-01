@@ -11,3 +11,4 @@
   with_items:
     - { src: 'alert_mgr_status.sh.j2', dest: '{{ shelldir }}/alert_mgr_status.sh' }
     - { src: 'alert_slave_status.sh.j2', dest: '{{ shelldir }}/alert_slave_status.sh' }
+    - { src: 'alert_lock_monitor.sh.j2', dest: '{{ shelldir }}/alert_lock_monitor.sh' }
