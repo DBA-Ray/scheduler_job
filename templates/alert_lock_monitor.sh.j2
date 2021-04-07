@@ -72,9 +72,9 @@ export "$1"="$variable"
 
 function check_for_lock_info () {
 
-folder_size=`du -sh ${lock_info_dir}|awk '{printf $1}'`
+folder_size=`du -s ${lock_info_dir}|awk '{printf $1}'`
 
-if [[ ${folder_sie} -ne 0 ]];then
+if [[ ${folder_size} -ne 0 ]];then
 
 mv -f ${lock_info_dir}/* ${lock_info_backup_dir}/
 
@@ -91,8 +91,8 @@ CONCAT( 'KILL', ' ', trx.trx_mysql_thread_id ) AS kill_connection,trx.trx_query 
 ON trx.trx_mysql_thread_id = thr.processlist_id JOIN performance_schema.metadata_locks meta ON thr.thread_id = meta.OWNER_THREAD_ID JOIN performance_schema.events_statements_history esh ON thr.thread_id = esh.thread_id \
 WHERE to_seconds(now())- to_seconds( trx.trx_started ) >= 3 AND esh.sql_text LIKE CONCAT('%',meta.OBJECT_NAME,'%')\G;" > ${lock_info_dir}/${1}_trx_uncommited_`date "+%Y%m%d_%H%M%S"`.txt
 
-mysql --login-path=${1} -e "SELECT DISTINCT esh.SQL_TEXT AS "阻塞SQL",ilw.waiting_query AS "等待SQL",CONCAT( thr.processlist_user, '@', thr.processlist_host ) AS 用户, ilw.locked_table AS 对象信息,ilw.blocking_trx_started \
-AS 阻塞开始时间,ilw.wait_age_secs AS 阻塞时间,ilw.locked_index AS 锁索引类型,ilw.blocking_trx_rows_locked AS 阻塞事务锁定行数,ilw.waiting_trx_rows_locked AS 等待事务锁定行数,ilw.blocking_lock_mode AS 阻塞锁模式,ilw.waiting_lock_mode AS 等待锁模式,ilw.sql_kill_blocking_query AS "KILL阻塞会话" \
+mysql --login-path=${1} -e "SELECT DISTINCT esh.SQL_TEXT,ilw.waiting_query,CONCAT( thr.processlist_user, '@', thr.processlist_host ) AS object_info,ilw.locked_table,ilw.blocking_trx_started \
+,ilw.wait_age_secs,ilw.locked_index,ilw.blocking_trx_rows_locked,ilw.waiting_trx_rows_locked,ilw.blocking_lock_mode,ilw.waiting_lock_mode,ilw.sql_kill_blocking_query \
 FROM sys.innodb_lock_waits ilw JOIN performance_schema.threads thr ON ilw.blocking_pid = thr.processlist_id JOIN performance_schema.events_statements_history esh ON thr.thread_id = esh.thread_id \
 WHERE esh.SQL_TEXT LIKE CONCAT('%',ilw.locked_table,'%')\G;" > ${lock_info_dir}/${1}_lock_wait_`date "+%Y%m%d_%H%M%S"`.txt
 
