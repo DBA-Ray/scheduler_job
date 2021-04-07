@@ -72,7 +72,15 @@ export "$1"="$variable"
 
 function check_for_lock_info () {
 
+folder_size=`du -sh ${lock_info_dir}|awk '{printf $1}'`
+
+if [[ ${folder_sie} -ne 0 ]];then
+
 mv -f ${lock_info_dir}/* ${lock_info_backup_dir}/
+
+else echo 'The folder is empty,no need to move files.'
+
+fi
 
 mysql --login-path=${1} -e "SELECT esh.sql_text, stlw.sql_kill_blocking_connection, stlw.waiting_query, stlw.waiting_query_secs, concat( stlw.object_schema, '.', stlw.object_name ) AS object_info, stlw.blocking_account, stlw.blocking_lock_type, stlw.blocking_lock_duration FROM \
 sys.schema_table_lock_waits stlw JOIN performance_schema.events_statements_history esh ON esh.thread_id = stlw.blocking_thread_id \
@@ -109,7 +117,8 @@ for i in `ls -l ${lock_info_dir}/| grep ^[^d] | awk '{print $9}'`
 do
 
 if  [ `cat ${lock_info_dir}/${i} |wc -l` -eq 0 ];then
-    echo "${i} is empty"
+    echo "${i} is empty,${i} will be deleted."
+    rm -f ${lock_info_dir}/${i}
 else 
 
 ${ossutil_dir} cp ${lock_info_dir}/${i} ${oss_dir}
