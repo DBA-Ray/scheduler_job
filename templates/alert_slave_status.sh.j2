@@ -99,7 +99,7 @@ if [ "${4}" = 'NULL' ] || [ "${4}" = '' ] ; then
        #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
 	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${1}' on server ${2}_${3}"
 
-elif [ "${4}" -gt 7 ];then
+elif [ "${4}" -gt 3 ];then
        #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
         SendMessageToDingding "The data replication latency is "${5}"!\nso keep an eye for the the replica channel '${1}' on server ${2}_${3}"
 fi
