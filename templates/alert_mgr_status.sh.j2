@@ -96,7 +96,7 @@ do
 check_for_uptime ${hostname}
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} in env_pro"
+        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} env_{{ business_env }}"
 else
 
 mgr_status ${hostname}

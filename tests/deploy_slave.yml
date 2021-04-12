@@ -2,8 +2,6 @@
 - hosts: slave_monitor
   remote_user: root
   vars:
-    initial_monitor: False
-    initial_xtrabackup: False
-    initial_dump: False
+    initial_xtrabackup: True
   roles:
     - dba_ray.scheduler_job

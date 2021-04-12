@@ -1,7 +1,0 @@
----
-- hosts: "{{ restore_host }}"
-  remote_user: root
-  vars:
-    execute_mysql_restore_job: True
-  roles:
-    - dba_ray.scheduler_job

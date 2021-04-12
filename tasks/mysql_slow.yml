@@ -47,6 +47,6 @@
     group: root
     mode: 0644
   with_items:
-    - { src: 'main_body.txt', dest: "{{ monitordir }}/main_body.txt" }
+    - { src: 'main_slow_body.txt', dest: "{{ monitordir }}/main_slow_body.txt" }
     - { src: 'slow_digest_example.docx', dest: "{{ monitordir }}/slow_digest_example.docx" }
   when: ansible_hostname == "ansible"

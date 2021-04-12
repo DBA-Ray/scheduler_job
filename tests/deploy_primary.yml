@@ -1,7 +1,0 @@
----
-- hosts: "{{ primary_hostname }}"
-  vars:
-    initial_mysql_defragment: False
-    initial_mysql_archive: False
-  roles:
-    - dba_ray.scheduler_job

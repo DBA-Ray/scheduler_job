@@ -2,19 +2,7 @@
 
 #Author DBA R
 
-if [ $# -ne 1 ]
-
-then
-
-    echo "usage: `basename $0` [admin_password]"
-
-    exit 1
-
-fi
-
 #source /etc/profile
-
-admin_passwd=${1}
 
 dingding_url="https://{{ dingding_url }}"
 
@@ -31,52 +19,31 @@ curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
 \"isAtAll\":false} }"
 }
 
-## Find the location of the mysql.sock file ##
-
-function check_for_socket () {
-        if [ -z $socket ] ; then
-                if [ -S /var/lib/mysql/mysql.sock ] ; then
-                        socket=/var/lib/mysql/mysql.sock
-                elif [ -S /tmp/mysql.sock ] ; then
-                        socket=/tmp/mysql.sock
-                else
-                        ps_socket=`netstat -ln | egrep "mysql(d)?\.sock" | awk '{ print $9 }'`
-                        if [ "$ps_socket" ] ; then
-                        socket=$ps_socket
-                        fi
-                fi
-        fi
-        if [ -S "$socket" ] ; then
-                echo UP > /dev/null
-        else
-                tmp_localip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|grep -v 172.17|grep -v 172.18|awk '{print $2}'|tr -d "addr:"`
-                localip=`echo $tmp_localip|awk '{print $1}'|sed -n '1p'`
-                echo "No valid socket file "$socket" found!"
-                echo "mysqld is not running or it is installed in a custom location on server $localip" | mail -v -s "alert_slave" rulei@jjl.cn
-                SendMessageToDingding "mysqld is not running or it is installed in a custom location on server $localip"
-                echo "Please set the $socket variable at the top of this script."
-                exit 1
-        fi
-}
-
-#check_for_socket
-
 function proxysql_status() {
-offline_proxysql=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password -e "\s" | grep Uptime: | awk '{ printf $2$3 }'`
+offline_proxysql=`mysql --login-path=${1} -e "\s" | grep Uptime: | awk '{ printf $2$3 }'`
 if [ -z ${offline_proxysql} ] ; then
-        SendMessageToDingding "proxysql is not running on server {{ ansible_hostname }} in env_{{ business_env }}"
+        SendMessageToDingding "proxysql is not running on server ${1}_${2}"
 else
-mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password \
--e "select * from runtime_mysql_servers;select * from runtime_mysql_servers;"
-offline_mysql_count=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password \
--e "select count(status) as count_offline_mysql from stats_mysql_connection_pool where status <> 'ONLINE'\G;"\
+
+offline_mysql_count=`mysql --login-path=${1} \
+-e "select count(distinct(hostname)) as count_offline_mysql from runtime_mysql_servers where status <> 'ONLINE'\G;"\
  | grep count_offline_mysql: | awk '{ printf $2 }'`
-offline_mysql=`mysql -u admin -p${admin_passwd} -h 127.0.0.1 -P6032 --prompt='Admin> ' --default-auth=mysql_native_password \
--e "select srv_host from stats_mysql_connection_pool where status <> 'ONLINE' limit 1\G;" | grep srv_host: | awk '{ printf $2 }'`
+
+offline_mysql=`mysql --login-path=${1} \
+-e "select distinct(hostname) as offline_mysql from runtime_mysql_servers where status <> 'ONLINE' limit 1\G;" | grep offline_mysql: | awk '{ printf $2 }'`
+
 if [ ${offline_mysql_count} -gt 0 ] ; then
      SendMessageToDingding "Please be aware that ${offline_mysql} is offline in env_{{ business_env }}!"
 fi
+
 fi
+
 }
 
-proxysql_status
+grep -v "^$" /etc/hosts|grep -v "^#"|grep proxysql|awk '{print $1,$2}'| while read ip hostname
+
+do
+
+proxysql_status ${hostname} ${ip}
+
+done

@@ -1,7 +1,0 @@
----
-- hosts: slave_monitor
-  remote_user: root
-  vars:
-    execute_mysql_dump_incr_job: True
-  roles:
-    - dba_ray.scheduler_job

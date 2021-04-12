@@ -20,8 +20,6 @@ hostname={{ ansible_hostname }}
 
 fulltime=`date +%H%M%S`
 
-time_start=`date +%s`
-
 backupdir={{ backupdir }}
 
 monitor="$backupdir/monitor/mysql_hotbackup_status.txt" ##zabbix监控文件
@@ -88,13 +86,24 @@ function check_status()
         echo 0 > ${monitor}
 
         echo "备份中心物理备份失败，请及时查看备份日志！" | mail -a $logdir/${hostname}_${time}_*.log -v -s "备份状态邮件告知" {{ recipient }}
-        SendMessageToDingding "{{ business_env }}备份中心（{{ ansible_hostname }}）物理备份失败，请及时查看备份日志！"
+        
+        SendMessageToDingding "{{ business_env }}备份中心（{{ ansible_hostname }}）物理备份失败，将要重新开始备份，请及时查看备份日志！"
+        
+        rm -rf ${backupdir}/databak/${hostname}/${hostname}_${time}*
+        
+        xtrabackup
 
     fi
 
 }
 
+function xtrabackup()
+
+{
+
 ###according to backup policy to run xtrabackup###
+
+time_start=`date +%s`
 
 if [ $fulltime -eq $n -o $fulltime -eq $n1 -o $fulltime -eq $n2 -o $fulltime -eq $n3 ]
 
@@ -133,6 +142,10 @@ else
     echo "it takes ${times} seconds to backup the incr backup!!!" >> $logdir/${hostname}_${time}_incr.log
 
 fi
+
+}
+
+xtrabackup
 
 ###Clean up the backup 7 days ago
 

@@ -105,14 +105,14 @@ elif [ "${4}" -gt 3 ];then
 fi
 }
 
-grep -v "^$" /etc/hosts|grep -v "^#"|grep {{ monitor_host_group_key }}|awk '{print $1,$2}'| while read ip hostname
+grep -v "^$" /etc/hosts|grep -v "^#"|grep slave|awk '{print $1,$2}'| while read ip hostname
 
 do
 
 check_for_uptime ${hostname}
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} in env_pro"
+        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} env_{{ business_env }}"
 else
 
 for i in ${channel_array[*]}

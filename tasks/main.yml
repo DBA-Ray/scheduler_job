@@ -1,11 +1,8 @@
 ---
 # tasks file for scheduler_job
 
-- include: mysql_summary.yml
-  when: initial_summary | default(False)
-
-- include: mysql_monitor.yml
-  when: initial_monitor | default(False)
+- include: mysql_monitor_manage.yml
+  when: initial_monitor_manage | default(False)
 
 - include: password.yml
   when: initial_xtrabackup | default(False)
@@ -13,32 +10,13 @@
 - include: mysql_xtrabackup.yml
   when: initial_xtrabackup | default(False)
 
-- include: mysql_dump.yml
-  when: initial_dump | default(False)
-
 - include: mysql_slow.yml
   when: initial_slow | default(False)
-
-- include: proxysql_monitor.yml
-  when: initial_proxysql_monitor | default(False)
-
-- include: mysql_defragment.yml
-  when: initial_mysql_defragment | default(False)
-
-- include: mysql_archive.yml
-  when: initial_mysql_archive | default(False)
 
 - include: password.yml
   when: >
         (execute_mysql_summary_job | default(False)) or
-        (execute_mysql_monitor_job | default(False)) or
         (execute_mysql_xtrabackup_job | default(False)) or
-        (execute_mysql_dump_job | default(False)) or
-        (execute_mysql_pump_job | default(False)) or
-        (execute_mysql_dump_incr_job | default(False)) or
-        (execute_mysql_restore_job | default(False)) or
-        (execute_proxysql_monitor_job | default(False)) or
-        (execute_mysql_defragment_job | default(False)) or
         (execute_mysql_archive_job | default(False))
 
 - include: execute_mysql_summary_job.yml
@@ -52,15 +30,6 @@
 
 - include: execute_mysql_xtra_restore_job.yml
   when: execute_mysql_xtra_restore_job | default(False)
-
-- include: execute_mysql_dump_job.yml
-  when: execute_mysql_dump_job | default(False)
-
-- include: execute_mysql_pump_job.yml
-  when: execute_mysql_pump_job | default(False)
-
-- include: execute_mysql_dump_incr_job.yml
-  when: execute_mysql_dump_incr_job | default(False)
 
 - include: execute_mysql_restore_job.yml
   when: execute_mysql_restore_job | default(False)
@@ -79,3 +48,6 @@
 
 - include: execute_mysql_archive_job.yml
   when: execute_mysql_archive_job | default(False)
+
+- include: execute_mysql_lock_monitor_job.yml
+  when: execute_mysql_lock_monitor_job | default(False)

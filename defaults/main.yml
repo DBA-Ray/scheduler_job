@@ -11,7 +11,6 @@ monitordir: "{{ install_dir }}/monitor"
 # Monitor info
 channel_array: "adch task"
 dingding_url: "oapi.dingtalk.com/robot/send?access_token=f333b3f832ac4e91f7906acb35eabbb538595e440c68b69cd71a25197509d509"
-monitor_host_group_key: mgr1
 # Xtrabackup info
 ssh_port: 22
 local_port: 7733

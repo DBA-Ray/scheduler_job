@@ -1,0 +1,59 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+
+then
+
+    echo "usage: `basename $0` [root_password]"
+
+    exit 1
+
+fi
+
+source /etc/profile
+
+instance="生产环境MySql服务运行状态简报"
+
+mailtitle=`date "+%Y年%m月%d日" -d "0 day"`$instance
+
+monitordir={{ monitordir }}
+
+port=3306
+
+grep -v "^$" /etc/hosts|grep -v "^#"|grep -E 'slave|mgr'|awk '{print $2}'| while read hostname
+
+do
+
+/usr/bin/expect <<-EOF
+
+set timeout 30
+
+spawn /usr/bin/pt-mysql-summary --host=${hostname} --user=root --port=${port} --ask-pass --all-databases > ${monitordir}/${hostname}_summary.txt
+
+expect *password*
+
+send '${1}'\r
+
+interact
+
+expect eof
+
+EOF
+
+done
+
+for i in `ls -l ${monitordir}/*summary.txt| grep ^[^d] | awk '{print $9}'`
+
+do
+
+echo "-a ${monitordir}/${i}" >> /tmp/mail_summary_tmp.txt
+
+done
+
+mapfile myarr < /tmp/mail_summary_tmp.txt
+
+echo ${myarr[@]}
+
+mail ${myarr[@]} -v -s "${mailtitle}" {{ recipient }} < ${monitordir}/main_summary_body.txt
+
+cat /dev/null > /tmp/mail_summary_tmp.txt

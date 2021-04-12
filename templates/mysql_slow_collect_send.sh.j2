@@ -3,8 +3,22 @@
 
 instance="生产环境慢SQL摘要"
 
-dailydir={{ monitordir }}
+monitordir={{ monitordir }}
 
 mailtitle=`date "+%Y年%m月%d日" -d "-1 day"`$instance
 
-mail -a $dailydir/mgr1_slow.txt -a $dailydir/mgr2_slow.txt -a $dailydir/mgr3_slow.txt -a $dailydir/slow_digest_example.docx -v -s "$mailtitle" {{ recipient }} < $dailydir/main_body.txt
+for i in `ls -l ${monitordir}/*slow.txt| grep ^[^d] | awk '{print $9}'`
+
+do
+
+echo "-a ${monitordir}/${i}" >> /tmp/mail_slow_tmp.txt
+
+done
+
+mapfile myarr < /tmp/mail_slow_tmp.txt
+
+echo ${myarr[@]}
+
+mail ${myarr[@]} -a ${monitordir}/slow_digest_example.docx -v -s "${mailtitle}" {{ recipient }} < ${monitordir}/main_slow_body.txt
+
+cat /dev/null > /tmp/mail_slow_tmp.txt

@@ -2,7 +2,6 @@
 - hosts: mgr_pro1:mgr_pro2:ansible
   remote_user: root
   vars:
-    initial_summary: False
-    initial_slow: False
+    initial_slow: True
   roles:
     - dba_ray.scheduler_job

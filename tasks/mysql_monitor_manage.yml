@@ -1,0 +1,18 @@
+- name: Create a directory for script file
+  file: path={{ shelldir }} state=directory owner=mysql group=mysql
+
+- name: Rendering script file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: mysql
+    group: mysql
+    mode: 0744
+  with_items:
+    - { src: 'alert_mgr_status.sh.j2', dest: '{{ shelldir }}/alert_mgr_status.sh' }
+    - { src: 'alert_slave_status.sh.j2', dest: '{{ shelldir }}/alert_slave_status.sh' }
+    - { src: 'alert_lock_monitor.sh.j2', dest: '{{ shelldir }}/alert_lock_monitor.sh' }
+    - { src: 'alert_proxysql_status.sh.j2', dest: '{{ shelldir }}/alert_proxysql_status.sh' }
+    - { src: 'mysql_defragment_tables.sh.j2', dest: '{{ shelldir }}/mysql_defragment_tables.sh' }
+    - { src: 'mysql_archive_tables.sh.j2', dest: '{{ shelldir }}/mysql_archive_tables.sh' }
+    - { src: 'mysql_summary.sh.j2', dest: '{{ shelldir }}/mysql_summary.sh' }

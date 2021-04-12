@@ -2,6 +2,6 @@
 - hosts: ansible
   remote_user: root
   vars:
-    initial_monitor: False
+    initial_monitor_manage: True
   roles:
     - dba_ray.scheduler_job
