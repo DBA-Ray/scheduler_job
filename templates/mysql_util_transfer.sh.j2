@@ -15,27 +15,37 @@ then
 
 fi
 
-time_start=`date +%s`
+source_host=${1}
+
+dbname=${2}
 
 processor=`cat /proc/cpuinfo |grep "processor"|wc -l`
+
+function backup_target_database (
+
+time_start=`date +%s`
 
 echo -e "\033[44;37m #######Start backup target database####### \033[0m" > /tmp/mysql_util.log
 
 echo -e "\033[44;37m #######Start backup target database####### \033[0m"
 
-echo "util.dumpSchemas([\"${2}\"], \"/data/util.dump_backup_${2}\", {threads: ${processor}, maxRate:\"\", bytesPerChunk: \"512M\", ocimds: true, compatibility: [\"strip_definers\", \"strip_restricted_grants\"]})" > /tmp/util.dump_backup_${2}.js
+echo "util.dumpSchemas([\"${1}\"], \"/data/util.dump_backup_${1}\", {threads: ${processor}, maxRate:\"\", bytesPerChunk: \"512M\", ocimds: true, compatibility: [\"strip_definers\", \"strip_restricted_grants\"]})" > /tmp/util.dump_backup_${1}.js
 
-if [ -d /data/util.dump_backup_${2} ]
+if [ -d /data/util.dump_backup_${1} ]
 
 then
 
-mv /data/util.dump_backup_${2} /data/util.dump_backup_${2}_${time_start}
+mv /data/util.dump_backup_${1} /data/util.dump_backup_${1}_${time_start}
 
 else echo "Directory does not exist."
 
 fi
 
-mysqlsh root@127.0.0.1 -f /tmp/util.dump_backup_${2}.js >> /tmp/mysql_util.log 2>&1
+mysqlsh root@127.0.0.1 -f /tmp/util.dump_backup_${1}.js >> /tmp/mysql_util.log 2>&1
+
+)
+
+function backup_source_database (
 
 echo -e "\033[44;37m #######Start backup source database####### \033[0m" >> /tmp/mysql_util.log
 
@@ -55,13 +65,17 @@ fi
 
 mysqlsh root@${1} -f /tmp/util.dump_${2}.js >> /tmp/mysql_util.log 2>&1
 
+)
+
+function restore_target_database (
+
 echo -e "\033[44;37m #######Start load source data####### \033[0m" >> /tmp/mysql_util.log
 
 echo -e "\033[44;37m #######Start load source data####### \033[0m"
 
-echo "util.loadDump(\"/data/util.dump_${2}\", {threads: ${processor}, ignoreVersion:true, ignoreExistingObjects: true, resetProgress: true, skipBinlog: false})" > /tmp/util.load_${2}.js
+echo "util.loadDump(\"/data/util.dump_${1}\", {threads: ${processor}, ignoreVersion:true, ignoreExistingObjects: true, resetProgress: true, skipBinlog: false})" > /tmp/util.load_${1}.js
 
-mysqlsh root@127.0.0.1 -f /tmp/util.load_${2}.js >> /tmp/mysql_util.log 2>&1
+mysqlsh root@127.0.0.1 -f /tmp/util.load_${1}.js >> /tmp/mysql_util.log 2>&1
 
 status=`grep -i error /tmp/mysql_util.log|wc -l`
 
@@ -84,3 +98,11 @@ echo -e "\033[41;37m Transfer unsuccessfully ended at `date +"%Y-%m-%d %H:%M:%S"
 echo -e "\033[41;37m Transfer unsuccessfully ended at `date +"%Y-%m-%d %H:%M:%S"`,please check the log. \033[0m"
 
 fi
+
+)
+
+backup_target_database ${dbname}
+
+backup_source_database ${source_host} ${dbname}
+
+restore_target_database ${dbname}
