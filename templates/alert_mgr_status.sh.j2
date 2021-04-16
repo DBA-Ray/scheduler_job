@@ -37,13 +37,19 @@ member_state=`mysql --login-path=${1}_${user} -e "select member_state from perfo
 last_error_message=`mysql --login-path=${1}_${user} -e "SELECT LAST_ERROR_MESSAGE FROM performance_schema.replication_applier_status_by_coordinator where CHANNEL_NAME='group_replication_applier'
 \G;" | grep LAST_ERROR_MESSAGE: | awk '{ print $2 }'`
 
-if [ $multi_single_whether == 'OFF' ] && [ $primary_whether == 'SECONDARY' ];then
+if [ "${primary_whether}" == '' ];then
+
+echo "${1}组复制已经停止,无法确定节点类型."
+
+elif [ $multi_single_whether == 'OFF' ] && [ $primary_whether == 'SECONDARY' ];then
 
 variable_read="SECONDARY"
 
-echo "本机不是PRIMARY,无需检测是否只读状态."
+echo "${1}不是PRIMARY,无需检测是否只读状态."
 
 else 
+
+echo "${1}是PRIMARY,需要检查是否只读状态."
 
 variable_read=`mysql --login-path=${1}_${user} -e "select VARIABLE_VALUE from performance_schema.global_variables where variable_name = 'super_read_only'\G;" | grep VARIABLE_VALUE: | awk '{ print $2 }'`
 
