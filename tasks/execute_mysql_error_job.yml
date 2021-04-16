@@ -1,2 +1,0 @@
-- name: Execute logrotate for mysql error log
-  shell: "/usr/sbin/logrotate -vf -s /var/lib/logrotate/logrotate.status /etc/logrotate.d/mysql"

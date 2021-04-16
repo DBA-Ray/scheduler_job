@@ -2,6 +2,8 @@
 
 source /etc/profile
 
+user=root
+
 log_date=`date +"%Y%m%d"`
 
 original_sql="SELECT ROUND(sum(data_free)/1024/1024,2) as data_free FROM information_schema.TABLES \
@@ -12,7 +14,7 @@ WHERE DATA_FREE >= 10*1024*1024 and table_schema not in ('mysql','sys','informat
 
 function defragment_table () {
 
-original_fragment_size=`mysql --login-path=${1} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
+original_fragment_size=`mysql --login-path=${1}_${user} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
 
 if [[ -z ${original_fragment_size} ]]; then
 
@@ -24,7 +26,7 @@ echo "Start defragmenting at `date +"%Y-%m-%d %H:%M:%S"`,The original frament si
 
 time_start=`date +%s`
 
-table_list=`mysql --login-path=${1} -e "${variable_table_sql}" | grep -v 'table_name'`
+table_list=`mysql --login-path=${1}_${user} -e "${variable_table_sql}" | grep -v 'table_name'`
 
 for i in ${table_list}
 
@@ -32,7 +34,7 @@ do
 
 echo `date +"%Y-%m-%d %H:%M:%S"` ${1}_${2} "alter table ${i} engine=innodb ..." >> /tmp/defragment_table_${log_date}.log
 
-mysql --login-path=${1} -e "alter table ${i} engine=innodb;"
+mysql --login-path=${1}_${user} -e "alter table ${i} engine=innodb;"
 
 done
 
@@ -42,7 +44,7 @@ time_end=`date +%s`
 
 times=$((${time_end}-${time_start}))
 
-fragment_size=`mysql --login-path=${1} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
+fragment_size=`mysql --login-path=${1}_${user} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
 
 if [[ -z ${fragment_size} ]]; then
 

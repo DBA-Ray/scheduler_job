@@ -3,7 +3,12 @@
 
 - name: Copy the oss client
   copy:
-    src: ossutil64.tgz
+    src: ossutil64.tar.gz
+    dest: "{{ shelldir }}"
+
+- name: Uncompress mossutil64.tar.gz to package dir
+  unarchive:
+    src: "{{ shelldir }}/ossutil64.tar.gz"
     dest: "{{ shelldir }}"
 
 - name: Rendering script file
