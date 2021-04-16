@@ -1,6 +1,11 @@
 - name: Create a directory for script file
   file: path={{ shelldir }} state=directory owner=mysql group=mysql
 
+- name: Copy the oss client
+  copy:
+    src: ossutil64.tgz
+    dest: "{{ shelldir }}"
+
 - name: Rendering script file
   template:
     src: "{{ item.src }}"
@@ -16,3 +21,4 @@
     - { src: 'mysql_defragment_tables.sh.j2', dest: '{{ shelldir }}/mysql_defragment_tables.sh' }
     - { src: 'mysql_archive_tables.sh.j2', dest: '{{ shelldir }}/mysql_archive_tables.sh' }
     - { src: 'mysql_summary.sh.j2', dest: '{{ shelldir }}/mysql_summary.sh' }
+    - { src: 'mysql_util_transfer.sh.j2', dest: '{{ shelldir }}/mysql_util_transfer.sh' }

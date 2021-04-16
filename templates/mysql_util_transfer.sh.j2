@@ -1,0 +1,86 @@
+#!/bin/bash
+
+#DBA RAY
+#只能同名数据库之间传输
+#脚本必须放在要加载数据的服务器本地（提升速度）
+
+
+if [ $# -ne 2 ]
+
+then
+
+    echo "usage: `basename $0` [source_host|database]"
+
+    exit 1
+
+fi
+
+time_start=`date +%s`
+
+processor=`cat /proc/cpuinfo |grep "processor"|wc -l`
+
+echo -e "\033[44;37m #######Start backup target database####### \033[0m" > /tmp/mysql_util.log
+
+echo -e "\033[44;37m #######Start backup target database####### \033[0m"
+
+echo "util.dumpSchemas([\"${2}\"], \"/data/util.dump_backup_${2}\", {threads: ${processor}, maxRate:\"\", bytesPerChunk: \"512M\", ocimds: true, compatibility: [\"strip_definers\", \"strip_restricted_grants\"]})" > /tmp/util.dump_backup_${2}.js
+
+if [ -d /data/util.dump_backup_${2} ]
+
+then
+
+mv /data/util.dump_backup_${2} /data/util.dump_backup_${2}_${time_start}
+
+else echo "Directory does not exist."
+
+fi
+
+mysqlsh root@127.0.0.1 -f /tmp/util.dump_backup_${2}.js >> /tmp/mysql_util.log 2>&1
+
+echo -e "\033[44;37m #######Start backup source database####### \033[0m" >> /tmp/mysql_util.log
+
+echo -e "\033[44;37m #######Start backup source database####### \033[0m"
+
+echo "util.dumpSchemas([\"${2}\"], \"/data/util.dump_${2}\", {threads: ${processor}, maxRate:\"\", bytesPerChunk: \"512M\", ocimds: true, compatibility: [\"strip_definers\", \"strip_restricted_grants\"]})" > /tmp/util.dump_${2}.js
+
+if [ -d /data/util.dump_${2} ]
+
+then
+
+mv /data/util.dump_${2} /data/util.dump_${2}_${time_start}
+
+else echo "Directory does not exist."
+
+fi
+
+mysqlsh root@${1} -f /tmp/util.dump_${2}.js >> /tmp/mysql_util.log 2>&1
+
+echo -e "\033[44;37m #######Start load source data####### \033[0m" >> /tmp/mysql_util.log
+
+echo -e "\033[44;37m #######Start load source data####### \033[0m"
+
+echo "util.loadDump(\"/data/util.dump_${2}\", {threads: ${processor}, ignoreVersion:true, ignoreExistingObjects: true, resetProgress: true, skipBinlog: false})" > /tmp/util.load_${2}.js
+
+mysqlsh root@127.0.0.1 -f /tmp/util.load_${2}.js >> /tmp/mysql_util.log 2>&1
+
+status=`grep -i error /tmp/mysql_util.log|wc -l`
+
+if [ $status -eq 0 ]
+
+then
+
+time_end=`date +%s`
+
+times=$((${time_end}-${time_start}))
+
+echo -e "\033[46;37m Transfer successfully ended at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to transfer data. \033[0m" >> /tmp/mysql_util.log
+
+echo -e "\033[46;37m Transfer successfully ended at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to transfer data. \033[0m"
+
+else 
+
+echo -e "\033[41;37m Transfer unsuccessfully ended at `date +"%Y-%m-%d %H:%M:%S"`,please check the log. \033[0m" >> /tmp/mysql_util.log
+
+echo -e "\033[41;37m Transfer unsuccessfully ended at `date +"%Y-%m-%d %H:%M:%S"`,please check the log. \033[0m"
+
+fi
