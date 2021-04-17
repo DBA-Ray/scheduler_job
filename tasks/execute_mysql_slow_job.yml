@@ -2,7 +2,7 @@
   shell: "sh -x {{ shelldir }}/mysql_slow_digest.sh"
   when: >
         (ansible_hostname in groups.mgr_pro1) or
-        (ansible_hostname in groups.mgr_pro2)
+        (ansible_hostname in groups.slave_monitor)
 
 - name: Execute mysql_summary_collect_send.sh
   shell: "sh -x {{ shelldir }}/mysql_slow_collect_send.sh"

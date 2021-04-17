@@ -1,5 +1,5 @@
 ---
-- hosts: "{{ primary_hostname }}"
+- hosts: ansible
   remote_user: root
   vars:
     execute_mysql_defragment_job: True

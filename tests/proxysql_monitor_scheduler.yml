@@ -1,5 +1,5 @@
 ---
-- hosts: proxysql_pro1:proxysql_pro2
+- hosts: ansible
   remote_user: root
   vars:
     execute_proxysql_monitor_job: True

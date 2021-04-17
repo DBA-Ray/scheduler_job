@@ -16,15 +16,15 @@ function defragment_table () {
 
 original_fragment_size=`mysql --login-path=${1}_${user} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
 
-if [[ -z ${original_fragment_size} ]]; then
+time_start=`date +%s`
+
+if [[ ${original_fragment_size} == "NULL" ]]; then
 
 echo "The original frament size of ${1}_${2} is less lan 10MB,no need to defragment."
 
 else
 
 echo "Start defragmenting at `date +"%Y-%m-%d %H:%M:%S"`,The original frament size of ${1}_${2} is ${original_fragment_size}MB." >> /tmp/defragment_table_${log_date}.log
-
-time_start=`date +%s`
 
 table_list=`mysql --login-path=${1}_${user} -e "${variable_table_sql}" | grep -v 'table_name'`
 
@@ -46,7 +46,7 @@ times=$((${time_end}-${time_start}))
 
 fragment_size=`mysql --login-path=${1}_${user} -e "${original_sql}" | grep data_free: | awk '{ print $2 }'`
 
-if [[ -z ${fragment_size} ]]; then
+if [[ ${fragment_size} == "NULL" ]]; then
 
 echo "Finsh defragmenting at `date +"%Y-%m-%d %H:%M:%S"`,it takes ${times} seconds to defragment tables of ${1}_${2}.The frament size is less than 10MB" >> /tmp/defragment_table_${log_date}.log
 
@@ -58,7 +58,7 @@ fi
 
 }
 
-grep -v "^$" /etc/hosts|grep -v "^#"|grep mgr|awk '{print $1,$2}'| while read ip hostname
+grep -v "^$" /etc/hosts|grep -v "^#"|grep mgr1|awk '{print $1,$2}'| while read ip hostname
 
 do
 

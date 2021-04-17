@@ -11,7 +11,7 @@ for i in `ls -l ${monitordir}/*slow.txt| grep ^[^d] | awk '{print $9}'`
 
 do
 
-echo "-a ${monitordir}/${i}" >> /tmp/mail_slow_tmp.txt
+echo "-a ${i}" >> /tmp/mail_slow_tmp.txt
 
 done
 

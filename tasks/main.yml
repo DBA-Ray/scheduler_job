@@ -4,9 +4,6 @@
 - include: mysql_monitor_manage.yml
   when: initial_monitor_manage | default(False)
 
-- include: password.yml
-  when: initial_xtrabackup | default(False)
-
 - include: mysql_xtrabackup.yml
   when: initial_xtrabackup | default(False)
 
@@ -31,14 +28,8 @@
 - include: execute_mysql_xtra_restore_job.yml
   when: execute_mysql_xtra_restore_job | default(False)
 
-- include: execute_mysql_restore_job.yml
-  when: execute_mysql_restore_job | default(False)
-
 - include: execute_mysql_slow_job.yml
   when: execute_mysql_slow_job | default(False)
-
-- include: execute_mysql_error_job.yml
-  when: execute_mysql_error_job | default(False)
 
 - include: execute_proxysql_monitor_job.yml
   when: execute_proxysql_monitor_job | default(False)

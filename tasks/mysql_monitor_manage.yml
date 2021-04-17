@@ -1,5 +1,35 @@
-- name: Create a directory for script file
-  file: path={{ shelldir }} state=directory owner=mysql group=mysql
+- name: Install the percona-release repository
+  yum:
+    name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    state: present
+  register: percona_release
+  retries: 3
+  until: percona_release is succeeded
+
+- name: Copy the percona-release.repo
+  copy: src=percona-original-release.repo dest=/etc/yum.repos.d/percona-original-release.repo
+
+- name: Install the percona tools
+  yum:
+    name: "{{ tools }}"
+  vars:
+    tools:
+    - percona-toolkit.x86_64
+    - percona-xtrabackup-80.x86_64
+    state: latest
+  register: result
+  retries: 7
+  until: result is succeeded
+
+- name: Create a directory for monitor
+  file:
+    state: directory
+    owner: root
+    group: root
+    path: "{{ item }}"
+  with_items:
+    - "{{ monitordir }}"
+    - "{{ shelldir }}"
 
 - name: Copy the oss client
   copy:
@@ -15,8 +45,8 @@
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: mysql
-    group: mysql
+    owner: root
+    group: root
     mode: 0744
   with_items:
     - { src: 'alert_mgr_status.sh.j2', dest: '{{ shelldir }}/alert_mgr_status.sh' }
@@ -27,3 +57,16 @@
     - { src: 'mysql_archive_tables.sh.j2', dest: '{{ shelldir }}/mysql_archive_tables.sh' }
     - { src: 'mysql_summary.sh.j2', dest: '{{ shelldir }}/mysql_summary.sh' }
     - { src: 'mysql_util_transfer.sh.j2', dest: '{{ shelldir }}/mysql_util_transfer.sh' }
+    - { src: 'mysql_slow_collect_send.sh.j2', dest: '{{ shelldir }}/mysql_slow_collect_send.sh'}
+
+- name: Copy the mail body file and example file
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: 'main_slow_body.txt', dest: "{{ monitordir }}/main_slow_body.txt" }
+    - { src: 'main_summary_body.txt', dest: "{{ monitordir }}/main_summary_body.txt" }
+    - { src: 'slow_digest_example.docx', dest: "{{ monitordir }}/slow_digest_example.docx" }

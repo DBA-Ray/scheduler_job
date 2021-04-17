@@ -16,6 +16,8 @@ fi
 
 time=`date "+%Y%m%d_%H%M%S"`
 
+pmm_password=${1}
+
 hostname={{ ansible_hostname }}
 
 fulltime=`date +%H%M%S`
@@ -91,7 +93,7 @@ function check_status()
         
         rm -rf ${backupdir}/databak/${hostname}/${hostname}_${time}*
         
-        xtrabackup
+        xtrabackup ${pmm_password}
 
     fi
 
@@ -145,7 +147,7 @@ fi
 
 }
 
-xtrabackup
+xtrabackup ${pmm_password}
 
 ###Clean up the backup 7 days ago
 

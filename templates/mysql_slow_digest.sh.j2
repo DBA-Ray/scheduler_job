@@ -7,7 +7,7 @@ dailyfile={{ ansible_hostname }}_`date +%Y%m%d%H%M%S`.txt
 
 logdir={{ logdir }}
 
-slowlog=slow.log
+slowlog=slow_{{ mysql_port }}.log
 
 starttime=`date "+%Y-%m-%d %H:%M:%S" -d "-1 day"`
 
