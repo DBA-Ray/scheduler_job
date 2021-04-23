@@ -27,6 +27,9 @@ if [ -z ${offline_proxysql} ] ; then
         SendMessageToDingding "proxysql is not running on server ${1}_${2}"
 else
 
+mysql --login-path=${1}_${user} \
+-e "load mysql servers to runtime;save mysql servers to disk;"
+
 offline_mysql_count=`mysql --login-path=${1}_${user} \
 -e "select count(distinct(hostname)) as count_offline_mysql from runtime_mysql_servers where status <> 'ONLINE'\G;"\
  | grep count_offline_mysql: | awk '{ printf $2 }'`
