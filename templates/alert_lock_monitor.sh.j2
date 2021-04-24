@@ -109,7 +109,7 @@ do
 check_for_uptime ${hostname} server_uptime
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname} env_{{ business_env }}"
+        SendMessageToDingding "mysql is not running on server ${hostname} in env_{{ business_env }}"
 else
 
 check_for_lock_info ${hostname}

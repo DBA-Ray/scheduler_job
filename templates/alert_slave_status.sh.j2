@@ -31,7 +31,7 @@ export server_uptime
 function slave_status() {
 Slave_IO=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Slave_IO_Running: | awk '{ print $2 }'`
 Slave_SQL=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Slave_SQL_Running: | awk '{ print $2 }'`
-Last_Error=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Last_Error: | awk '{ print $2 }'`
+Last_Error="`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Last_Error: | awk '{ $1=""; print $0 }'`"
 export Slave_IO
 export Slave_SQL
 export Last_Error
@@ -41,16 +41,16 @@ function slave_status_alert () {
 
 if [ -z ${4} -o -z ${5} ] ; then
         #echo "Replication is not configured or you do not have the required access to MySQL on server $3!"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "Replication is not configured \nor the replica channel '${1}' does not exist\nor you do not have the required access to MySQL on server ${2}_${3}!"
+        SendMessageToDingding "Replication is not configured \nor the replica channel '${1}' does not exist\nor you do not have the required access to MySQL on server ${2}_${3} in env_{{ business_env }}!"
 elif [ ${4} != 'Yes' ] ; then
         #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "SQL thread not running for the the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
+        SendMessageToDingding "SQL thread not running for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
 elif [ ${5} != 'Yes' ] ; then
         #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "IO thread not running for the the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
+        SendMessageToDingding "IO thread not running for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
 elif [ ${4} == 'No' ] && [ ${5} == 'No' ] ; then
         #echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "Replication slave is inactive for the the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
+        SendMessageToDingding "Replication slave is inactive for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
 fi
 
 }
@@ -97,11 +97,11 @@ function slave_delay_status_alert () {
 
 if [ "${4}" = 'NULL' ] || [ "${4}" = '' ] ; then
        #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
-	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${1}' on server ${2}_${3}"
+	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
 
 elif [ "${4}" -gt 3 ];then
        #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
-        SendMessageToDingding "The data replication latency is "${5}"!\nso keep an eye for the the replica channel '${1}' on server ${2}_${3}"
+        SendMessageToDingding "The data replication latency is "${5}"!\nso keep an eye for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
 fi
 }
 
@@ -112,7 +112,7 @@ do
 check_for_uptime ${hostname}
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} env_{{ business_env }}"
+        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} in env_{{ business_env }}!"
 else
 
 for i in ${channel_array[*]}

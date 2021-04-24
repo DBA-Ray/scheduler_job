@@ -34,8 +34,8 @@ primary_whether=`mysql --login-path=${1}_${user} -e "select member_role from per
 
 member_state=`mysql --login-path=${1}_${user} -e "select member_state from performance_schema.replication_group_members where member_id=@@server_uuid\G;" | grep member_state: | awk '{ print $2 }'`
 
-last_error_message=`mysql --login-path=${1}_${user} -e "SELECT LAST_ERROR_MESSAGE FROM performance_schema.replication_applier_status_by_coordinator where CHANNEL_NAME='group_replication_applier'
-\G;" | grep LAST_ERROR_MESSAGE: | awk '{ print $2 }'`
+last_error_message="`mysql --login-path=${1}_${user} -e "SELECT LAST_ERROR_MESSAGE FROM performance_schema.replication_applier_status_by_coordinator where CHANNEL_NAME='group_replication_applier'
+\G;" | grep LAST_ERROR_MESSAGE: | awk '{ $1=""; print $0 }'`"
 
 if [ "${primary_whether}" == '' ];then
 
@@ -65,15 +65,15 @@ function mgr_status_alert () {
 
 if [ -z ${3} ] ; then
        #echo -e "MGR is not configured or you do not have the required access to MySQL on server "$1"!"|mail -v -s "$1" rulei@jjl.cn
-        SendMessageToDingding "MGR is not configured or you do not have \nthe required access to MySQL on server "${1}_${2}"!"
+        SendMessageToDingding "MGR is not configured or you do not have \nthe required access to MySQL on server "${1}_${2}" in env_{{ business_env }}!"
 elif [ "${3}" != "ONLINE" ] ; then
        #echo -e "Please be aware that member_state is \"${member_state}\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn
-        SendMessageToDingding "Please be aware that member_state is ${3} with group replication on server "${1}_${2}"! Last Error Message:"${5}""  
+        SendMessageToDingding "Please be aware that member_state is ${3} with group replication on server "${1}_${2}" in env_{{ business_env }}! Last Error Message:"${5}""  
 fi
 
 if [ ${4} == 'ON' ] ; then
        #echo -e "Please be aware that the super_read_only is \"ON\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn     
-       SendMessageToDingding "Please be aware that the super_read_only is ON \nwith group replication on server "${1}_${2}"! Last Error Message:"${5}""
+       SendMessageToDingding "Please be aware that the super_read_only is ON \nwith group replication on server "${1}_${2}" in env_{{ business_env }}! Last Error Message:"${5}""
 fi
 
 }
@@ -90,7 +90,7 @@ function performance_status_alert () {
 
 if [ "${3}" -gt 1 ];then
        #echo -e "The count_transactions_in_queue is \"$1\",please be aware that there is a problem with group replication on server $2!" | mail -v -s "$2"  rulei@jjl.cn
-        SendMessageToDingding "The count_transactions_in_queue is "${3}",\nplease be aware that there is delay with group replication on server ${1}_${2}!"
+        SendMessageToDingding "The count_transactions_in_queue is "${3}",\nplease be aware that there is delay with group replication on server ${1}_${2} in env_{{ business_env }}!"
 fi
 
 }
@@ -102,7 +102,7 @@ do
 check_for_uptime ${hostname}
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} env_{{ business_env }}"
+        SendMessageToDingding "mysql is not running on server ${hostname}_${ip} in env_{{ business_env }}"
 else
 
 mgr_status ${hostname}
