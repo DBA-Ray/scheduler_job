@@ -26,7 +26,7 @@ grep -v "^$" /etc/hosts|grep -v "^#"|grep -E 'slave|mgr'|awk '{print $2}'| while
 
 do
 
-/usr/bin/pt-mysql-summary --host=${hostname} --user=root --port=${port} --password=${root_password} --sleep=3600 --all-databases > ${monitordir}/${hostname}_summary.txt
+/usr/bin/pt-mysql-summary --host=${hostname} --user=root --port=${port} --password=${root_password} --sleep=60 --all-databases > ${monitordir}/${hostname}_summary.txt
 
 done
 
