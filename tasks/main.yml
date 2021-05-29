@@ -1,6 +1,11 @@
 ---
 # tasks file for scheduler_job
 
+- include: password.yml
+  when: >
+        (initial_monitor_manage | default(False)) or
+        (initial_xtrabackup | default(False))
+
 - include: mysql_monitor_manage.yml
   when: initial_monitor_manage | default(False)
 
@@ -9,12 +14,6 @@
 
 - include: mysql_slow.yml
   when: initial_slow | default(False)
-
-- include: password.yml
-  when: >
-        (execute_mysql_summary_job | default(False)) or
-        (execute_mysql_xtrabackup_job | default(False)) or
-        (execute_mysql_archive_job | default(False))
 
 - include: execute_mysql_summary_job.yml
   when: execute_mysql_summary_job | default(False)

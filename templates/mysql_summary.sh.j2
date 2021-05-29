@@ -1,15 +1,5 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]
-
-then
-
-    echo "usage: `basename $0` [root_password]"
-
-    exit 1
-
-fi
-
 source /etc/profile
 
 instance="生产环境MySql服务运行状态简报"
@@ -20,7 +10,7 @@ monitordir={{ monitordir }}
 
 port={{ mysql_port }}
 
-root_password=${1}
+root_password="{{ root_password }}"
 
 grep -v "^$" /etc/hosts|grep -v "^#"|grep -E 'slave|mgr'|awk '{print $2}'| while read hostname
 

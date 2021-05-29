@@ -1,2 +1,2 @@
 - name: Execute pt_mysql_summary.sh
-  shell: "sh -x {{ shelldir }}/mysql_summary.sh '{{ root_password }}'"
+  shell: "sh -x {{ shelldir }}/mysql_summary.sh"

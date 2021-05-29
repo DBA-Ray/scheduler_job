@@ -44,13 +44,14 @@ if [ -z ${4} -o -z ${5} ] ; then
         SendMessageToDingding "Replication is not configured \nor the replica channel '${1}' does not exist\nor you do not have the required access to MySQL on server ${2}_${3} in env_{{ business_env }}!"
 elif [ ${4} != 'Yes' ] ; then
         #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "SQL thread not running for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
+        SendMessageToDingding "SQL thread not running for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
 elif [ ${5} != 'Yes' ] ; then
         #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "IO thread not running for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
+        SendMessageToDingding "IO thread not running for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
 elif [ ${4} == 'No' ] && [ ${5} == 'No' ] ; then
         #echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessageToDingding "Replication slave is inactive for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
+        SendMessageToDingding "Replication slave is inactive for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
+else echo "The sql thread and io thread statuses are ${4} and ${5} for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}."
 fi
 
 }
@@ -97,11 +98,14 @@ function slave_delay_status_alert () {
 
 if [ "${4}" = 'NULL' ] || [ "${4}" = '' ] ; then
        #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
-	SendMessageToDingding "The replica is stopped or not configured for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
+	SendMessageToDingding "The replica is stopped or not configured for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
 
 elif [ "${4}" -gt 3 ];then
        #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
-        SendMessageToDingding "The data replication latency is "${5}"!\nso keep an eye for the the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
+        SendMessageToDingding "The data replication latency is "${5}"!\nso keep an eye for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
+
+else echo "The data replication latency is "${5}" for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}."
+
 fi
 }
 

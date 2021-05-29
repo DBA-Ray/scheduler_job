@@ -2,21 +2,7 @@
 
 #author DBA R
 
-if [ $# -ne 1 ]
-
-then
-
-    echo "usage: `basename $0` [pmm_password]"
-
-    exit 1
-
-fi
-
 #source /etc/profile ##加载环境变量，否则在crontab任务里会存在问题
-
-time=`date "+%Y%m%d_%H%M%S"`
-
-pmm_password=${1}
 
 hostname={{ ansible_hostname }}
 
@@ -93,61 +79,57 @@ function check_status()
         
         rm -rf ${backupdir}/databak/${hostname}/${hostname}_${time}*
         
-        xtrabackup ${pmm_password}
+        sleep 600
+
+        /bin/sh ${shelldir}/backup.sh
 
     fi
 
 }
 
-function xtrabackup()
-
-{
-
 ###according to backup policy to run xtrabackup###
 
-time_start=`date +%s`
+time=`date "+%Y%m%d_%H%M%S"`
 
 if [ $fulltime -eq $n -o $fulltime -eq $n1 -o $fulltime -eq $n2 -o $fulltime -eq $n3 ]
 
 then
 
-    init_check_file
+    time_start=`date +%s`
+ 
+    echo `date +"%Y-%m-%d %H:%M:%S"` "${hostname} is starting full backup ..."
 
-    /bin/sh $shelldir/mysql_xtrabackup.sh full ${1} >> $logdir/${hostname}_${time}_full.log 2>&1
+    /bin/sh $shelldir/mysql_xtrabackup.sh full >> $logdir/${hostname}_${time}_full.log 2>&1
+
+    time_end=`date +%s`
+
+    times=$((${time_end}-${time_start}))
+
+    echo "It takes ${times} seconds to backup the full backup!!!"
+
+    echo "It takes ${times} seconds to backup the full backup!!!" >> $logdir/${hostname}_${time}_full.log
 
     check_status $logdir/${hostname}_${time}_full.log;
 
 else
 
-    init_check_file
+    time_start=`date +%s`
 
-    /bin/sh $shelldir/mysql_xtrabackup.sh incr ${1} >> $logdir/${hostname}_${time}_incr.log 2>&1
+    echo `date +"%Y-%m-%d %H:%M:%S"` "${hostname} is starting incr backup ..."
+
+    /bin/sh $shelldir/mysql_xtrabackup.sh incr >> $logdir/${hostname}_${time}_incr.log 2>&1
+
+    time_end=`date +%s`
+
+    times=$((${time_end}-${time_start}))
+
+    echo "It takes ${times} seconds to backup the incr backup!!!"
+
+    echo "It takes ${times} seconds to backup the incr backup!!!" >> $logdir/${hostname}_${time}_incr.log
 
     check_status $logdir/${hostname}_${time}_incr.log;
 
 fi
-
-###get the backup log and spend time of backup###
-
-time_end=`date +%s`
-
-times=$((${time_end}-${time_start}))
-
-if [ $fulltime -eq $n -o $fulltime -eq $n1 -o $fulltime -eq $n2 -o $fulltime -eq $n3 ]
-
-then
-
-    echo "it takes ${times} seconds to backup the full backup!!!" >> $logdir/${hostname}_${time}_full.log
-
-else
-
-    echo "it takes ${times} seconds to backup the incr backup!!!" >> $logdir/${hostname}_${time}_incr.log
-
-fi
-
-}
-
-xtrabackup ${pmm_password}
 
 ###Clean up the backup 7 days ago
 
@@ -155,6 +137,6 @@ if [ $fulltime -eq 030001 ]
 
 then
 
-   /bin/sh $shelldir/mysql_xtrabackup.sh clean ${1}
+   /bin/sh $shelldir/mysql_xtrabackup.sh clean
 
 fi

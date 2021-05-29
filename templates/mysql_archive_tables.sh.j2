@@ -1,16 +1,8 @@
 #/bin/bash
 
-if [ $# -ne 1 ]
-
-then
-
-    echo "usage: `basename $0` [audit_password]"
-
-    exit 1
-
-fi
-
 #source /etc/profile
+
+archive_password="{{ mysql_monitor_password }}"
 
 log_date=`date +"%Y%m%d"`
 
@@ -52,7 +44,7 @@ where=`echo ${dic["$hostname"]}|awk -F[?] '{print $4}'`
 
 mysql -h${hostname} -uaudit -p${1} -P${port} -e "create table if not exists \`${db}\`.\`${table}_${arc_suffix}\` like \`${db}\`.\`${table}\`;"
 
-pt-archiver --source h=${hostname},P=${port},u=audit,p=${1},D=${db},t=${table},A=utf8mb4 --dest h=${hostname},P=${port},u=audit,p=${1},D=${db},t=${table}_${arc_suffix},A=utf8mb4 \
+pt-archiver --source h=${hostname},P=${port},u=audit,p=${archive_password},D=${db},t=${table},A=utf8mb4 --dest h=${hostname},P=${port},u=audit,p=${1},D=${db},t=${table}_${arc_suffix},A=utf8mb4 \
 --where="${where}" --txn-size=10000 --limit=10000 --progress=10000 \
 --statistics --ignore --quick-delete --bulk-delete --no-safe-auto-increment --why-quit >> /tmp/archive_table_${log_date}.log
 

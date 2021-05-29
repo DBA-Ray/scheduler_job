@@ -1,5 +1,5 @@
 ---
-- hosts: all:!ansible:!proxysql_pro1
+- hosts: slave_monitor:mgr_pro1
   remote_user: root
   vars:
     initial_slow: True

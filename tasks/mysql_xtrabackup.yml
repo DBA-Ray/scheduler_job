@@ -26,4 +26,4 @@
     name: "logrotate"
     minute: "0"
     hour: "*/1"
-    job: "{{ backupdir }}/shell/backup.sh '{{ pmm_password }}' > /dev/null 2>&1 &"
+    job: "{{ backupdir }}/shell/backup.sh > /dev/null 2>&1 &"

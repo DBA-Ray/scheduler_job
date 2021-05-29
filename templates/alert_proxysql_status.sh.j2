@@ -24,7 +24,7 @@ curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
 function proxysql_status() {
 offline_proxysql=`mysql --login-path=${1}_${user} -e "\s" | grep Uptime: | awk '{ printf $2$3 }'`
 if [ -z ${offline_proxysql} ] ; then
-        SendMessageToDingding "proxysql is not running on server ${1}_${2}"
+        SendMessageToDingding "proxysql is not running on server ${1}_${2} in env_{{ business_env }}"
 else
 
 mysql --login-path=${1}_${user} \
@@ -34,11 +34,17 @@ offline_mysql_count=`mysql --login-path=${1}_${user} \
 -e "select count(distinct(hostname)) as count_offline_mysql from runtime_mysql_servers where status <> 'ONLINE'\G;"\
  | grep count_offline_mysql: | awk '{ printf $2 }'`
 
-offline_mysql=`mysql --login-path=${1}_${user} \
+if [ ${offline_mysql_count} -gt 0 ] ; then
+
+     offline_mysql=`mysql --login-path=${1}_${user} \
 -e "select distinct(hostname) as offline_mysql from runtime_mysql_servers where status <> 'ONLINE' limit 1\G;" | grep offline_mysql: | awk '{ printf $2 }'`
 
-if [ ${offline_mysql_count} -gt 0 ] ; then
      SendMessageToDingding "Please be aware that ${offline_mysql} is offline in env_{{ business_env }}!"
+
+     else
+
+     echo "proxysql is running on server ${1}_${2} in env_{{ business_env }}.No offline MySql."    
+
 fi
 
 fi

@@ -68,12 +68,14 @@ if [ -z ${3} ] ; then
         SendMessageToDingding "MGR is not configured or you do not have \nthe required access to MySQL on server "${1}_${2}" in env_{{ business_env }}!"
 elif [ "${3}" != "ONLINE" ] ; then
        #echo -e "Please be aware that member_state is \"${member_state}\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn
-        SendMessageToDingding "Please be aware that member_state is ${3} with group replication on server "${1}_${2}" in env_{{ business_env }}! Last Error Message:"${5}""  
+        SendMessageToDingding "Please be aware that member_state is ${3} with group replication on server "${1}_${2}" in env_{{ business_env }}! Last Error Message:"${5}""
+else echo "The member_state is ${3} with group replication on server "${1}_${2}" in env_{{ business_env }}."
 fi
 
 if [ ${4} == 'ON' ] ; then
        #echo -e "Please be aware that the super_read_only is \"ON\" with group replication on server "$1"! Last Error Message:"${LAST_ERROR_MESSAGE}""|mail -v -s "$1" rulei@jjl.cn     
        SendMessageToDingding "Please be aware that the super_read_only is ON \nwith group replication on server "${1}_${2}" in env_{{ business_env }}! Last Error Message:"${5}""
+else echo "The super_read_only is ${4} with group replication on server "${1}_${2}" in env_{{ business_env }}."
 fi
 
 }
@@ -91,6 +93,7 @@ function performance_status_alert () {
 if [ "${3}" -gt 1 ];then
        #echo -e "The count_transactions_in_queue is \"$1\",please be aware that there is a problem with group replication on server $2!" | mail -v -s "$2"  rulei@jjl.cn
         SendMessageToDingding "The count_transactions_in_queue is "${3}",\nplease be aware that there is delay with group replication on server ${1}_${2} in env_{{ business_env }}!"
+else echo "The count_transactions_in_queue is "${3}" with group replication on server ${1}_${2} in env_{{ business_env }}."
 fi
 
 }
