@@ -29,7 +29,7 @@ mapfile myarr < /tmp/mail_slow_tmp.txt
 
 echo ${myarr[@]}
 
-if test -z "${myarr[@]}"
+if [[ "${myarr[@]}" == '' ]]
 
 then echo "`date +"%Y-%m-%d %H:%M:%S"` No slow queries are generated!" >> /tmp/mysql_slow_collect_send.log
 
