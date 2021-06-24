@@ -1,5 +1,5 @@
 ---
-- hosts: slave_monitor:mgr_pro1
+- hosts: mgr_pro1:mgr_testa:mgr_testb:mgr_testc:slave_monitor:slave_monitor_testa
   remote_user: root
   vars:
     initial_slow: True

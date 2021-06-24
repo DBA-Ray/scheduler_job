@@ -102,7 +102,7 @@ WHERE esh.SQL_TEXT LIKE CONCAT('%',ilw.locked_table,'%')\G;" > ${lock_info_dir}/
 
 check_file_dir
 
-grep -v "^$" /etc/hosts|grep -v "^#"|grep -E 'mgr1|dev|test|prod'|awk '{print $1,$2}'| while read ip hostname
+grep -v "^$" /etc/hosts|grep -v "^#"|grep -E 'mgr1'|awk '{print $1,$2}'| while read ip hostname
 
 do
 

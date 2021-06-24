@@ -2,7 +2,7 @@
 
 source /etc/profile
 
-instance="生产环境MySql服务运行状态简报"
+instance="{{ business_env }}环境MySql服务运行状态简报"
 
 mailtitle=`date "+%Y年%m月%d日" -d "0 day"`$instance
 

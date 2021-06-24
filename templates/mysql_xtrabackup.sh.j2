@@ -56,7 +56,7 @@ time=`date "+%Y%m%d_%H%M%S"`              # don't modify
 
 ${xtrabackup} --defaults-file=${conf_file} --user=${bakuser} --password=${bakpass} --host=${host} --port=${port} \
 --datadir=${datadir} --socket=${socket} --no-lock --extra-lsndir=${chkpointdir} --parallel={{ ansible_processor_vcpus }} --backup \
---lock-ddl --no-server-version-check --no-version-check --target-dir=${remotedir}/${hostname}_${time}_full
+--no-server-version-check --no-version-check --target-dir=${remotedir}/${hostname}_${time}_full
 
 ##调用xtrabackup工具准备还原
 
@@ -91,7 +91,7 @@ lsn=`cat ${chkpointdir}/xtrabackup_checkpoints|grep to_lsn|awk '{print $NF}'`
 
 ${xtrabackup} --defaults-file=${conf_file} --user=${bakuser} --password=${bakpass} --host=${host} --port=${port} \
 --datadir=${datadir} --socket=${socket} --no-lock --extra-lsndir=${chkpointdir} --parallel={{ ansible_processor_vcpus }} --backup --incremental-lsn=${lsn} \
---lock-ddl --no-server-version-check --no-version-check --target-dir=${remotedir}/${hostname}_${time}_incr/
+--no-server-version-check --no-version-check --target-dir=${remotedir}/${hostname}_${time}_incr/
 
 ##压缩备份
 

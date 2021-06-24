@@ -6,8 +6,6 @@
 
 user=repl
 
-channel_array=({{ channel_array }})
-
 dingding_url="https://{{ dingding_url }}"
 
 #向钉钉发送消息方法
@@ -119,7 +117,9 @@ if [ -z ${server_uptime} ] ; then
         SendMessageToDingding "mysql is not running on server ${hostname}_${ip} in env_{{ business_env }}!"
 else
 
-for i in ${channel_array[*]}
+channel_list=`mysql --login-path=${hostname}_${user} -s -e "SELECT CHANNEL_NAME FROM performance_schema.replication_connection_status;" | grep -v CHANNEL_NAME`
+
+for i in ${channel_list}
 
 do 
 
