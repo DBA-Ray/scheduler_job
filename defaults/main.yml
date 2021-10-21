@@ -26,7 +26,7 @@ mysql_port: 3377
 # General mail info
 scp_port: 22
 send_host: 192.168.7.232 # It must be ip,otherwise the ssh command need prompt.
-recipient: rulei@ttjianbao.com
+recipient: rulei@example.com
 # Archive tables info
 archive_dic: >
              [rm-2ze50s793579th5w4.mysql.rds.aliyuncs.com]="3306?xxl-job?xxl_job_log?trigger_time < DATE_FORMAT(DATE_SUB(CURRENT_DATE(),INTERVAL 30 day),'%Y-%m-%d 23:59:59')"
