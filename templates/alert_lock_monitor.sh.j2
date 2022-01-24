@@ -18,20 +18,57 @@ url_dir_base="https://mptsss.oss-cn-beijing.aliyuncs.com/lock_info"
 
 ossutil_dir={{ shelldir }}/ossutil64
 
+## 发送消息方法
+function SendMessage()
+
+{
+
 dingding_url="https://{{ dingding_url }}"
 
-function MSendMessageToDingding()
-{ # 发送钉钉消息
-Dingding_Url="${dingding_url}" 
-curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
- { \"msgtype\": \"markdown\",
-     \"markdown\": {
-         \"title\":\"${1}\",
-         \"text\": \"#### 数据库实例${2}：监测到${1} \n> ![screenshot](https://mptsss.oss-cn-beijing.aliyuncs.com/pic_dba/mysql_lock.jpg)\n> #### 请点击[查看](${3}) \n\"
-     },
-\"at\":{ 
+#向钉钉发送消息方法
+function SendMessageToDingding()
+{ 
+curl "${dingding_url}" -H 'Content-Type: application/json' -d "
+ { \"msgtype\":\"text\",
+\"text\":{
+\"content\":\"${1}\"},
+\"at\":{
 \"atMobiles\":[\"15668661298\"],
 \"isAtAll\":false} }"
+}
+
+weixin_url="https://{{ weixin_url }}"
+
+#向微信发送消息方法
+function SendMessageToWeixin()
+{
+cat > sendweb.sh<< EOF
+    curl "${weixin_url}" \
+   -H 'Content-Type: application/json' \
+   -d '
+   {
+        "msgtype": "text",
+        "text": {
+            "content": "${1}",
+            "mentioned_mobile_list":["15668661298"]
+        }
+   }'
+EOF
+sh sendweb.sh && rm -rf sendweb.sh
+}
+
+if [ ${1} == "dingding" ]
+
+then SendMessageToDingding "${2}"
+
+elif [ ${1} == "weixin" ]
+
+then SendMessageToWeixin "${2}"
+
+else echo "未设置发送消息方式"
+
+fi
+
 }
 
 function check_file_dir()
@@ -109,7 +146,7 @@ do
 check_for_uptime ${hostname} server_uptime
 
 if [ -z ${server_uptime} ] ; then
-        SendMessageToDingding "mysql is not running on server ${hostname} in env_{{ business_env }}"
+        SendMessage "{{ message_type }}" "mysql is not running on server ${hostname} in env_{{ business_env }}"
 else
 
 check_for_lock_info ${hostname}
@@ -127,15 +164,15 @@ ${ossutil_dir} cp ${lock_info_dir}/${i} ${oss_dir}
 
 if [[ ${i} =~ 'meta_lock' ]];then
 
-MSendMessageToDingding 元数据锁 ${hostname} ${url_dir_base}/${i}
+SendMessage "{{ message_type }}" 元数据锁 ${hostname} ${url_dir_base}/${i}
 
 elif [[ ${i} =~ 'trx_uncommited' ]];then
 
-MSendMessageToDingding 超3秒未提交事务 ${hostname} ${url_dir_base}/${i}
+SendMessage "{{ message_type }}" 超3秒未提交事务 ${hostname} ${url_dir_base}/${i}
 
 elif [[ ${i} =~ 'lock_wait' ]];then
 
-MSendMessageToDingding 锁等待 ${hostname} ${url_dir_base}/${i}
+SendMessage "{{ message_type }}" 锁等待 ${hostname} ${url_dir_base}/${i}
 
 else echo "`date "+%Y%m%d_%H%M%S"`无锁相关监控报警信息！"
 

@@ -1,5 +1,5 @@
 ---
-- hosts: slave_monitor
+- hosts: "slave_monitor_{{ business_env }}"
   remote_user: root
   vars:
     initial_xtrabackup: True

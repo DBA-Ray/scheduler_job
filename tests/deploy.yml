@@ -1,5 +1,5 @@
 ---
-- hosts: mgr_pro1:mgr_testa:mgr_testb:mgr_testc:slave_monitor:slave_monitor_testa
+- hosts: "mgr_{{ business_env }}"
   remote_user: root
   vars:
     initial_slow: True

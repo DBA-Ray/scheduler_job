@@ -1,6 +1,6 @@
 ---
 # environment variable
-business_env: pro
+business_env: pro1
 # primary hostname for mgr
 primary_hostname: mgr1
 # defaults file for scheduler_job
@@ -9,8 +9,10 @@ basedir: "{{ install_dir }}/mysql"
 shelldir: "{{ install_dir }}/shell"
 monitordir: "{{ install_dir }}/monitor"
 # Monitor info
+message_type: weixin
 channel_array: "mgr_single"
 dingding_url: "oapi.dingtalk.com/robot/send?access_token=f333b3f832ac4e91f7906acb35eabbb538595e440c68b69cd71a25197509d509"
+weixin_url: "qyapi.weixin.qq.com/cgi-bin/webhook/send?key=98e9b840-d24b-4fc8-8072-78a6fc41ac10"
 # Xtrabackup info
 ssh_port: 22
 local_port: 7733
