@@ -77,17 +77,17 @@ function slave_status_alert () {
 
 if [ -z ${4} -o -z ${5} ] ; then
         #echo "Replication is not configured or you do not have the required access to MySQL on server $3!"|mail -v -s "$3" rulei@jjl.cn
-        SendMessage "{{ message_type }}" "Replication is not configured \nor the replica channel '${1}' does not exist\nor you do not have the required access to MySQL on server ${2}_${3} in env_{{ business_env }}!"
+        SendMessage "{{ message_type }}" "Replication is not configured \nor the replica channel '${1}' does not exist\nor you do not have the required access to MySQL on server ${2}_${3}!"
 elif [ ${4} != 'Yes' ] ; then
         #echo "SQL thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessage "{{ message_type }}" "SQL thread not running for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
+        SendMessage "{{ message_type }}" "SQL thread not running for the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
 elif [ ${5} != 'Yes' ] ; then
         #echo "IO thread not running on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessage "{{ message_type }}" "IO thread not running for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
+        SendMessage "{{ message_type }}" "IO thread not running for the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
 elif [ ${4} == 'No' ] && [ ${5} == 'No' ] ; then
         #echo "Replication slave is inactive on server $3!Last Error:${Last_Error}"|mail -v -s "$3" rulei@jjl.cn
-        SendMessage "{{ message_type }}" "Replication slave is inactive for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!\nLast Error:"${6}""
-else echo "The sql thread and io thread statuses are ${4} and ${5} for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}."
+        SendMessage "{{ message_type }}" "Replication slave is inactive for the replica channel '${1}' on server ${2}_${3}!\nLast Error:"${6}""
+else echo "The sql thread and io thread statuses are ${4} and ${5} for the replica channel '${1}' on server ${2}_${3}."
 fi
 
 }
@@ -103,7 +103,7 @@ function human_readable_time () {
         usage="$0 seconds 'variable'"
         if [ -z $1 ] || [ -z $2 ] ; then
                 echo $usage $red
-                exit 1
+                #exit 1
         fi
         days=$(echo "scale=0 ; $1 / 86400" | bc -l)
         remainder=$(echo "scale=0 ; $1 % 86400" | bc -l)
@@ -116,13 +116,13 @@ function human_readable_time () {
 
 function slave_delay_status () {
 local variable1=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
-sleep 5
+sleep 3
 local variable2=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
-sleep 5
+sleep 3
 local variable3=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
-sleep 5
+sleep 3
 local variable4=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
-sleep 5
+sleep 3
 local variable5=`mysql --login-path=${1}_${user} -e "show slave status for channel '${2}'\G" | grep Seconds_Behind_Master: | awk '{ print $2 }'`
 c=25
 local variable_sum=`expr $variable1 + $variable2 + $variable3 + $variable4 + $variable5`
@@ -134,13 +134,13 @@ function slave_delay_status_alert () {
 
 if [ "${4}" = 'NULL' ] || [ "${4}" = '' ] ; then
        #echo "Unknown Offset - perhaps slave is stopped or not configured on server $3!" | mail -v -s "$3" rulei@jjl.cn
-	SendMessage "{{ message_type }}" "The replica is stopped or not configured for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
+	SendMessage "{{ message_type }}" "The replica is stopped or not configured for the replica channel '${1}' on server ${2}_${3}!"
 
 elif [ "${4}" -gt 3 ];then
        #echo "The data replication latency is "$2",so keep an eye on server $3" | mail -v -s "$3"  rulei@jjl.cn
-        SendMessage "{{ message_type }}" "The data replication latency is "${5}"!\nso keep an eye for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}!"
+        SendMessage "{{ message_type }}" "The data replication latency is "${5}"!\nso keep an eye for the replica channel '${1}' on server ${2}_${3}!"
 
-else echo "The data replication latency is "${5}" for the replica channel '${1}' on server ${2}_${3} in env_{{ business_env }}."
+else echo "The data replication latency is "${5}" for the replica channel '${1}' on server ${2}_${3}."
 
 fi
 }
@@ -152,7 +152,7 @@ do
 check_for_uptime ${hostname}
 
 if [ -z ${server_uptime} ] ; then
-        SendMessage "{{ message_type }}" "mysql is not running on server ${hostname}_${ip} in env_{{ business_env }}!"
+        SendMessage "{{ message_type }}" "mysql is not running on server ${hostname}_${ip}!"
 else
 
 channel_list=`mysql --login-path=${hostname}_${user} -s -e "SELECT CHANNEL_NAME FROM performance_schema.replication_connection_status;" | grep -v CHANNEL_NAME`

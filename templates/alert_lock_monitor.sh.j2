@@ -146,7 +146,7 @@ do
 check_for_uptime ${hostname} server_uptime
 
 if [ -z ${server_uptime} ] ; then
-        SendMessage "{{ message_type }}" "mysql is not running on server ${hostname} in env_{{ business_env }}"
+        SendMessage "{{ message_type }}" "mysql is not running on server ${hostname}_${ip}"
 else
 
 check_for_lock_info ${hostname}
@@ -186,7 +186,7 @@ fi
 
 done
 
-if [[ ${cleantime} -eq 070001 ]];then
+if [[ 10#${cleantime} -eq 070001 ]];then
 
 clean_backup_file
 

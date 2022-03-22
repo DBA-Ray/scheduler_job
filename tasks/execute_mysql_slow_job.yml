@@ -1,7 +1,7 @@
 - name: Execute mysql_slow_digest.sh
-  shell: "sh -x {{ shelldir }}/mysql_slow_digest.sh"
+  shell: "sh {{ shelldir }}/mysql_slow_digest.sh"
   when: ansible_hostname != "ansible"
 
 - name: Execute mysql_summary_collect_send.sh
-  shell: "sh -x {{ shelldir }}/mysql_slow_collect_send.sh"
+  shell: "sh {{ shelldir }}/mysql_slow_collect_send.sh"
   when: ansible_hostname == "ansible"

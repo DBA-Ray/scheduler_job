@@ -1,5 +1,5 @@
 ---
-- hosts: "mgr_{{ business_env }}"
+- hosts: mgr_dev1:mgr_pro1
   remote_user: root
   vars:
     initial_slow: True

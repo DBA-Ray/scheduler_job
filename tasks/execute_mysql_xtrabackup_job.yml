@@ -1,4 +1,4 @@
 - name: Execute backup.sh
   shell: "{{ item }}"
   with_items:
-    - "sh -x {{ backupdir }}/shell/backup.sh '{{ pmm_password }}'"
+    - "sh {{ backupdir }}/shell/backup.sh '{{ pmm_password }}'"

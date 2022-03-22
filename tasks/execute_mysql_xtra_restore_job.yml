@@ -1,4 +1,4 @@
 - name: Execute xtra_data_archiving.sh
   shell: "{{ item }}"
   with_items:
-    - "sh -x {{ backupdir }}/shell/xtra_data_archiving.sh  \'{{ restore_array }}\'"
+    - "sh {{ backupdir }}/shell/xtra_data_archiving.sh  \'{{ restore_array }}\'"

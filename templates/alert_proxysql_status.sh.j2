@@ -62,7 +62,7 @@ fi
 function proxysql_status() {
 offline_proxysql=`mysql --login-path=${1}_${user} -e "\s" | grep Uptime: | awk '{ printf $2$3 }'`
 if [ -z ${offline_proxysql} ] ; then
-     SendMessage "{{ message_type }}" "proxysql is not running on server ${1}_${2} in env_{{ business_env }}"
+     SendMessage "{{ message_type }}" "proxysql is not running on server ${1}_${2}!"
 else
 
 mysql --login-path=${1}_${user} \
@@ -77,11 +77,11 @@ if [ ${offline_mysql_count} -gt 0 ] ; then
      offline_mysql=`mysql --login-path=${1}_${user} \
 -e "select distinct(hostname) as offline_mysql from runtime_mysql_servers where status <> 'ONLINE' limit 1\G;" | grep offline_mysql: | awk '{ printf $2 }'`
 
-     SendMessage "{{ message_type }}" "Please be aware that ${offline_mysql} is offline in env_{{ business_env }}!"
+     SendMessage "{{ message_type }}" "Please be aware that ${offline_mysql} is offline!"
 
      else
 
-     echo "proxysql is running on server ${1}_${2} in env_{{ business_env }}.No offline MySql."    
+     echo "proxysql is running on server ${1}_${2}.No offline MySql."    
 
 fi
 

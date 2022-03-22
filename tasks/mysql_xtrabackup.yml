@@ -27,3 +27,6 @@
     minute: "0"
     hour: "*/1"
     job: "{{ backupdir }}/shell/backup.sh > /dev/null 2>&1 &"
+
+- name: Initialize the first full backup
+  shell: "sh {{ backupdir }}/shell/mysql_xtrabackup.sh full"
