@@ -23,7 +23,7 @@
 
 - name: Add log polling task schedule for xtrabackup
   cron:
-    name: "logrotate"
+    name: "auto xtrabackup"
     minute: "0"
     hour: "*/1"
     job: "{{ backupdir }}/shell/backup.sh > /dev/null 2>&1 &"
