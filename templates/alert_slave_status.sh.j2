@@ -155,7 +155,7 @@ if [ -z ${server_uptime} ] ; then
         SendMessage "{{ message_type }}" "mysql is not running on server ${hostname}_${ip}!"
 else
 
-channel_list=`mysql --login-path=${hostname}_${user} -s -e "SELECT CHANNEL_NAME FROM performance_schema.replication_connection_status;" | grep -v CHANNEL_NAME`
+channel_list=`mysql --login-path=${hostname}_${user} -s -e "SELECT CHANNEL_NAME FROM performance_schema.replication_connection_status where CHANNEL_NAME not like '%group_replication%';" | grep -v CHANNEL_NAME`
 
 for i in ${channel_list}
 
