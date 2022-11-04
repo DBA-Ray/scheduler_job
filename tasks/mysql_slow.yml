@@ -17,3 +17,10 @@
     mode: 0744
   with_items:
     - { src: 'mysql_slow_digest.sh.j2', dest: "{{ shelldir }}/mysql_slow_digest.sh" }
+
+- name: Add log polling task schedule for inductiving slow query logs
+  cron:
+    name: "inductiving slow query logs"
+    minute: "0"
+    hour: "9"
+    job: "{{ shelldir }}/mysql_slow_digest.sh > /dev/null 2>&1 &"

@@ -25,9 +25,9 @@ fi
 
 done
 
-mapfile myarr < /tmp/mail_slow_tmp.txt
-
 echo ${myarr[@]}
+
+mapfile myarr < /tmp/mail_slow_tmp.txt
 
 if [[ "${myarr[@]}" == '' ]]
 

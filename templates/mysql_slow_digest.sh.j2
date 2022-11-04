@@ -15,8 +15,8 @@ endtime=`date "+%Y-%m-%d %H:%M:%S"`
 
 scp_port={{ scp_port }}
 
-pt-query-digest --report --since "${starttime}" --until "${endtime}" $logdir/$slowlog > $monitordir/$dailyfile
+pt-query-digest --report --limit=100% --since "${starttime}" --until "${endtime}" $logdir/$slowlog > $monitordir/$dailyfile
 
-scp -P {{ scp_port }} $monitordir/$dailyfile root@{{ send_host }}:${monitordir}/{{ ansible_hostname }}_slow.txt
+scp -P ${scp_port} $monitordir/$dailyfile root@{{ send_host }}:${monitordir}/{{ ansible_hostname }}_slow.txt
 
 find $monitordir/ -mtime +2 -name "*.txt" -exec rm -rf {} \;

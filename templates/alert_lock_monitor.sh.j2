@@ -4,9 +4,13 @@
 
 #source /etc/profile
 
-user=root
+user=repl
 
 cleantime=`date +%H%M%S`
+
+nginx_url=http://{{ send_host }}
+
+nginx_root={{ monitordir }}/nginx
 
 lock_info_dir={{ monitordir }}/lock
 
@@ -25,14 +29,16 @@ function SendMessage()
 
 dingding_url="https://{{ dingding_url }}"
 
-#向钉钉发送消息方法
-function SendMessageToDingding()
-{ 
-curl "${dingding_url}" -H 'Content-Type: application/json' -d "
- { \"msgtype\":\"text\",
-\"text\":{
-\"content\":\"${1}\"},
-\"at\":{
+function MSendMessageToDingding()
+{ # 发送钉钉消息
+Dingding_Url="${dingding_url}" 
+curl "${Dingding_Url}" -H 'Content-Type: application/json' -d "
+ { \"msgtype\": \"markdown\",
+     \"markdown\": {
+         \"title\":\"${1}\",
+         \"text\": \"#### 数据库实例${2}：监测到${1} \n> ![screenshot](${url_dir_base}/mysql_lock.jpg)\n> #### 请点击[查看](${3}) \n\"
+     },
+\"at\":{ 
 \"atMobiles\":[\"{{ mobile }}\"],
 \"isAtAll\":false} }"
 }
@@ -43,27 +49,33 @@ weixin_url="https://{{ weixin_url }}"
 function SendMessageToWeixin()
 {
 cat > sendweb.sh<< EOF
-    curl "${weixin_url}" \
-   -H 'Content-Type: application/json' \
-   -d '
-   {
-        "msgtype": "text",
-        "text": {
-            "content": "${1}",
-            "mentioned_mobile_list":["{{ mobile }}"]
-        }
-   }'
+     curl "${weixin_url}" \
+    -H 'Content-Type: application/json' \
+    -d '
+{
+    "msgtype": "news",
+    "news": {
+       "articles" : [
+           {
+               "title" : "${1}",
+               "description" : "数据库实例${2}：监测到${1},请点击查看。",
+               "url" : "${3}",
+               "picurl" : "${nginx_url}/mysql_lock.jpg"
+           }
+        ]
+    }
+}'
 EOF
 sh sendweb.sh && rm -rf sendweb.sh
 }
 
 if [ ${1} == "dingding" ]
 
-then SendMessageToDingding "${2}"
+then SendMessageToDingding "${2}" "${3}" "${4}"
 
 elif [ ${1} == "weixin" ]
 
-then SendMessageToWeixin "${2}"
+then SendMessageToWeixin "${2}" "${3}" "${4}"
 
 else echo "未设置发送消息方式"
 
@@ -93,14 +105,16 @@ function clean_backup_file()
 
     find ${lock_info_backup_dir}/ -name "*${delete_time}*" -exec rm -rf {} \;
 
-/usr/bin/expect <<-EOF
-set timeout 30
-spawn ${ossutil_dir} rm ${oss_dir} --include "*${delete_time}*" -r
-expect *remove*
-send y\r
-interact
-expect eof
-EOF
+    find ${nginx_root}/ -name "*${delete_time}*" -exec rm -rf {} \;
+
+# /usr/bin/expect <<-EOF
+# set timeout 30
+# spawn ${ossutil_dir} rm ${oss_dir} --include "*${delete_time}*" -r
+# expect *remove*
+# send y\r
+# interact
+# expect eof
+# EOF
 
 }
 
@@ -160,19 +174,27 @@ if  [ `cat ${lock_info_dir}/${i} |wc -l` -eq 0 ];then
     rm -f ${lock_info_dir}/${i}
 else 
 
-${ossutil_dir} cp ${lock_info_dir}/${i} ${oss_dir}
+#${ossutil_dir} cp ${lock_info_dir}/${i} ${oss_dir}
+
+cp -f ${lock_info_dir}/${i} ${nginx_root}
 
 if [[ ${i} =~ 'meta_lock' ]];then
 
-SendMessage "{{ message_type }}" 元数据锁 ${hostname} ${url_dir_base}/${i}
+#SendMessage "weixin" 元数据锁 ${hostname} ${url_dir_base}/${i}
+
+SendMessage "weixin" 元数据锁 ${hostname} ${nginx_url}/${i}
 
 elif [[ ${i} =~ 'trx_uncommited' ]];then
 
-SendMessage "{{ message_type }}" 超3秒未提交事务 ${hostname} ${url_dir_base}/${i}
+#SendMessage "weixin" 超3秒未提交事务 ${hostname}  'www.qq.com' ${url_dir_base}/${i}
+
+SendMessage "weixin" 超3秒未提交事务 ${hostname}  ${nginx_url}/${i}
 
 elif [[ ${i} =~ 'lock_wait' ]];then
 
-SendMessage "{{ message_type }}" 锁等待 ${hostname} ${url_dir_base}/${i}
+#SendMessage "weixin" 锁等待 ${hostname} ${url_dir_base}/${i}
+
+SendMessage "weixin" 锁等待 ${hostname} ${nginx_url}/${i}
 
 else echo "`date "+%Y%m%d_%H%M%S"`无锁相关监控报警信息！"
 

@@ -70,3 +70,52 @@
     - { src: 'main_slow_body.txt', dest: "{{ monitordir }}/main_slow_body.txt" }
     - { src: 'main_summary_body.txt', dest: "{{ monitordir }}/main_summary_body.txt" }
     - { src: 'slow_digest_example.docx', dest: "{{ monitordir }}/slow_digest_example.docx" }
+
+- name: Add log polling task schedule for monitoring mgr
+  cron:
+    name: "monitor mgr"
+    minute: "*/5"
+    hour: "*"
+    job: "{{ shelldir }}/alert_mgr_status.sh > /dev/null 2>&1 &"
+
+- name: Add log polling task schedule for monitoring replica
+  cron:
+    name: "monitor replica"
+    minute: "*/30"
+    hour: "*"
+    job: "{{ shelldir }}/alert_slave_status.sh > /dev/null 2>&1 &"
+
+- name: Add log polling task schedule for monitoring lock
+  cron:
+    name: "monitor lock"
+    minute: "*/1"
+    hour: "*"
+    job: "{{ shelldir }}/alert_lock_monitor.sh > /dev/null 2>&1 &"
+
+- name: Add log polling task schedule for monitoring proxysql
+  cron:
+    name: "monitor proxysql"
+    minute: "*/3"
+    hour: "*"
+    job: "{{ shelldir }}/alert_proxysql_status.sh > /dev/null 2>&1 &"
+
+- name: Add log polling task schedule for inspection mysql
+  cron:
+    name: "inspection mysql in the morning"
+    minute: "0"
+    hour: "9"
+    job: "{{ shelldir }}/mysql_summary.sh > /dev/null 2>&1 &"
+
+- name: Add log polling task schedule for inspection mysql
+  cron:
+    name: "inspection mysql in the afternoon"
+    minute: "0"
+    hour: "17"
+    job: "{{ shelldir }}/mysql_summary.sh > /dev/null 2>&1 &"
+
+- name: Add log polling task schedule for sending slow query logs
+  cron:
+    name: "sending slow query logs"
+    minute: "10"
+    hour: "9"
+    job: "{{ shelldir }}/mysql_slow_collect_send.sh > /dev/null 2>&1 &"

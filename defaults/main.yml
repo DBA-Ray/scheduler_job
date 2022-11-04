@@ -1,6 +1,6 @@
 ---
 # environment variable
-business_env: dev1
+business_env: pro1
 # primary hostname for mgr
 primary_hostname: mgr1
 # defaults file for scheduler_job
@@ -28,7 +28,7 @@ logdir: "{{ basedir }}/log"
 mysql_port: 3377
 # General mail info
 scp_port: 22
-send_host: 172.16.101.218 # It must be ip,otherwise the ssh command need prompt.
+send_host: 10.56.8.232 # It must be ip,otherwise the ssh command need prompt.
 recipient: rulei@example.com
 # Archive tables info
 archive_dic: >

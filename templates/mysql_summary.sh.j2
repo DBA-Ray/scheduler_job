@@ -28,6 +28,14 @@ echo "-a ${i}" >> /tmp/mail_summary_tmp.txt
 
 done
 
+for k in `ls -l ${monitordir}/proxysql*| grep ^[^d] | awk '{print $9}'`
+
+do
+
+echo "-a ${k}" >> /tmp/mail_summary_tmp.txt
+
+done
+
 mapfile myarr < /tmp/mail_summary_tmp.txt
 
 echo ${myarr[@]}
