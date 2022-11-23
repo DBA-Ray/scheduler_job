@@ -42,4 +42,6 @@ echo ${myarr[@]}
 
 mail ${myarr[@]} -v -s "${mailtitle}" {{ recipient }} < ${monitordir}/main_summary_body.txt
 
+#echo -e "各位好！\n\n附件为数据库错误日志和当前各节点MySql服务运行状态，请大家关注。\n\nDBA 星棋"|mail ${myarr[@]} -v -s "${mailtitle}" rulei@hlzd.com.cn
+
 cat /dev/null > /tmp/mail_summary_tmp.txt

@@ -37,6 +37,8 @@ else
 
 mail ${myarr[@]} -a ${monitordir}/slow_digest_example.docx -v -s "${mailtitle}" {{ recipient }} < ${monitordir}/main_slow_body.txt
 
+#echo -e "各位好！\n\n附件为昨日9点至今日9点的生产环境慢SQL汇总分析以及说明样例，请大家关注。\n\n注：\n1.此邮件为>脚本自动发送；\n2.由于数据层是多节点提供数据服务，所以发送的附件分别为每个节点的慢SQL；\n3.slow_digest_example.docx为分析慢查询报告样例，请务必仔细阅读！\n\nDBA 星棋"|mail ${myarr[@]} -a ${monitordir}/slow_digest_example.docx -v -s "${mailtitle}" rulei@hlzd.com.cn
+
 cat /dev/null > /tmp/mail_slow_tmp.txt
 
 fi
